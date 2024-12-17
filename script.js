@@ -2,6 +2,8 @@ let isEditorReady = false;
 let editor;
 let current_file;
 let current_file_value;
+let isEmmetRegistered = false; // Add a global flag to track Emmet registration
+
 
 async function initMonacoEditor(filename, lang) {
     try {
@@ -47,10 +49,22 @@ async function initMonacoEditor(filename, lang) {
         });
 
         require(['vs/editor/editor.main'], function () {
-            emmetMonaco.emmetHTML(monaco);
+            // Register Emmet only once
+            if (!isEmmetRegistered) {
+                console.log("Registering Emmet...");
+                emmetMonaco.emmetHTML(monaco);
+                isEmmetRegistered = true;
+            }
+
             monaco.editor.defineTheme('github-dark', theme);
             monaco.editor.setTheme('github-dark');
             document.getElementById('monacoeditorid').innerHTML = "";
+
+            // Dispose of any existing editor instance
+            if (editor) {
+                editor.dispose();
+            }
+
             editor = monaco.editor.create(document.getElementById('monacoeditorid'), {
                 value: content,
                 language: lang,
@@ -62,20 +76,24 @@ async function initMonacoEditor(filename, lang) {
 
             isEditorReady = true;
 
-            // Save file on Ctrl+S
-            window.addEventListener("keydown", async (event) => {
+            // Remove previous keydown listener and add a new one
+            const saveHandler = async (event) => {
                 if (event.ctrlKey && event.key === "s") {
                     event.preventDefault();
                     const currentValue = editor.getValue();
                     await saveFile(current_file, currentValue);
                     console.log(`File "${current_file}" saved successfully!`);
                 }
-            });
+            };
+
+            window.removeEventListener("keydown", saveHandler); // Remove existing handler
+            window.addEventListener("keydown", saveHandler);    // Add new handler
         });
     } catch (error) {
         console.error(`Error initializing editor: ${error.message}`);
     }
 }
+
 
 // Function to save file to the server
 async function saveFile(filename, content) {
@@ -98,4 +116,6 @@ function runinnewtab() {
 }
 
 // Initialize the editor
-initMonacoEditor("index.html", "html");
+window.addEventListener("DOMContentLoaded", () => {
+    initMonacoEditor("index.html", "html");
+});
