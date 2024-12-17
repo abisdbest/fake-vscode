@@ -3098,7 +3098,7 @@
                                     <div class="part banner" id="workbench.parts.banner" role="banner" tabindex="0" data-keybinding-context="1"></div>
                                  </div>
                                  <div class="split-view-view visible" style="top: 0px; height: 35px;">
-                                    <div class="part titlebar inactive" id="workbench.parts.titlebar" role="none" style="background-color: rgb(31, 36, 40); color: rgb(149, 157, 165); border-bottom: 1px solid rgb(27, 31, 35); --zoom-factor: 1; width: 1536px; height: 35px;">
+                                    <div class="part titlebar inactive" id="workbench.parts.titlebar" role="none" style="background-color: rgb(31, 36, 40); color: rgb(149, 157, 165); border-bottom: 1px solid rgb(27, 31, 35); --zoom-factor: 1; width: 100%; height: 35px;">
                                        <div class="titlebar-container">
                                           <div class="titlebar-drag-region"></div>
                                           <div class="titlebar-left">
@@ -3153,11 +3153,11 @@
                                              <div class="monaco-sash vertical" style="left: 269px;"></div>
                                              <div class="monaco-sash vertical disabled" style="left: 1534px;"></div>
                                           </div>
-                                          <div class="monaco-scrollable-element " role="presentation" style="position: relative; overflow: hidden;">
+                                          <div class="monaco-scrollable-element " role="presentation" style="position: fixed; overflow: hidden;">
                                              <div class="split-view-container" style="overflow: hidden;">
                                                 <div class="split-view-view visible" style="left: 0px; width: 48px;">
                                                    <div class="part activitybar left bordered" id="workbench.parts.activitybar" role="none" style="background-color: rgb(36, 41, 46); border-color: rgb(27, 31, 35);">
-                                                      <div class="content" style="width: 48px; height: 638px;">
+                                                      <div class="content" style="width: 48px; height: calc(100% - 57px);">
                                                          <div class="menubar compact overflow-menu-only inactive" role="menubar">
                                                             <div class="menubar-menu-button" role="menuitem" tabindex="0" aria-label="Application Menu" aria-haspopup="true" style="visibility: visible;">
                                                                <div class="menubar-menu-title toolbar-toggle-more codicon codicon-menubar-more" role="none" aria-hidden="true"></div>
@@ -3264,7 +3264,7 @@
                                                             </div>
                                                          </div>
                                                       </div>
-                                                      <div class="content" style="width: 222px; height: 603px;">
+                                                      <div class="content" style="width: 222px; height: 100%;">
                                                          <div class="monaco-progress-container done" role="progressbar" aria-valuemin="0" style="display: none;" aria-hidden="true">
                                                             <div class="progress-bit" style="background-color: var(--vscode-progressBar-background); width: inherit; opacity: 1;"></div>
                                                          </div>
@@ -3284,7 +3284,7 @@
                                                                   </div>
                                                                   <div class="monaco-scrollable-element " role="presentation" style="position: relative; overflow: hidden;">
                                                                      <div class="split-view-container" style="overflow: hidden;">
-                                                                        <div class="split-view-view visible" style="top: 0px; height: 559px;">
+                                                                        <div class="split-view-view visible" style="top: 0px; height: 100%;">
                                                                            <div class="pane expanded vertical" data-keybinding-context="13">
                                                                               <div class="pane-header expanded" tabindex="0" role="button" aria-label="Explorer Section: codespaces-blank [Codespaces: didactic space giggle]" aria-expanded="true" draggable="true" style="line-height: 22px; color: var(--vscode-sideBarSectionHeader-foreground); background-color: var(--vscode-sideBarSectionHeader-background); border-top: 1px solid var(--vscode-sideBarSectionHeader-border);" fdprocessedid="uij0s9">
                                                                                  <div class="twisty-container codicon-view-pane-container-expanded codicon"></div>
@@ -3483,7 +3483,7 @@
                                                                               </div>
                                                                            </div>
                                                                         </div>
-                                                                        <div class="split-view-view visible" style="top: 559px; height: 22px;">
+                                                                        <div class="split-view-view visible" style="top: calc(100% - 138px); height: 22px;">
                                                                            <div class="pane vertical" data-keybinding-context="8">
                                                                               <div class="pane-header" tabindex="0" role="button" aria-label="Outline Section" aria-expanded="false" draggable="true" style="line-height: 22px; color: var(--vscode-sideBarSectionHeader-foreground); background-color: var(--vscode-sideBarSectionHeader-background); border-top: 1px solid var(--vscode-sideBarSectionHeader-border);" fdprocessedid="70eb6k">
                                                                                  <div class="twisty-container codicon-view-pane-container-collapsed codicon"></div>
@@ -3506,7 +3506,7 @@
                                                                               </div>
                                                                            </div>
                                                                         </div>
-                                                                        <div class="split-view-view visible" style="top: 581px; height: 22px;">
+                                                                        <div class="split-view-view visible" style="top: calc(100% - 114px); height: 22px;">
                                                                            <div class="pane vertical" data-keybinding-context="9">
                                                                               <div class="pane-header timeline-view" tabindex="0" role="button" aria-label="Timeline Section" aria-expanded="false" draggable="true" style="line-height: 22px; color: var(--vscode-sideBarSectionHeader-foreground); background-color: var(--vscode-sideBarSectionHeader-background); border-top: 1px solid var(--vscode-sideBarSectionHeader-border);" fdprocessedid="v1j6yo">
                                                                                  <div class="twisty-container codicon-view-pane-container-collapsed codicon"></div>
@@ -3552,7 +3552,7 @@
                                                       </div>
                                                    </div>
                                                 </div>
-                                                <div class="split-view-view visible" style="left: 271px; width: 1265px;">
+                                                <div class="split-view-view visible" style="left: 271px; width: 100%; height: 100%;">
                                                    <div class="monaco-grid-branch-node">
                                                       <div class="monaco-split-view2 vertical">
                                                          <div class="sash-container">
@@ -3562,9 +3562,9 @@
                                                          </div>
                                                          <div class="monaco-scrollable-element " role="presentation" style="position: relative; overflow: hidden;">
                                                             <div class="split-view-container" style="overflow: hidden;">
-                                                               <div class="split-view-view visible" style="top: 0px; height: 407px;">
+                                                               <div class="split-view-view visible" style="top: 0px; height: calc(100%); width: 100%;">
                                                                   <div class="part editor" id="workbench.parts.editor" role="main">
-                                                                     <div class="content" data-keybinding-context="2" style="overflow: hidden; background-color: rgb(36, 41, 46); width: 1265px; height: 407px;">
+                                                                     <div class="content" data-keybinding-context="2" style="overflow: hidden; background-color: rgb(36, 41, 46); width: calc(100% - 270px); height: calc(100%);">
                                                                         <div class="grid-view-container">
                                                                            <div class="monaco-grid-view">
                                                                               <div class="monaco-grid-branch-node">
@@ -3572,7 +3572,7 @@
                                                                                     <div class="sash-container"></div>
                                                                                     <div class="monaco-scrollable-element " role="presentation" style="position: relative; overflow: hidden;">
                                                                                        <div class="split-view-container" style="overflow: hidden;">
-                                                                                          <div class="split-view-view visible" style="top: 0px; height: 407px;">
+                                                                                          <div class="split-view-view visible" style="top: 0px; height: 100%;">
                                                                                              <div data-keybinding-context="3" class="editor-group-container active max-height-478px">
                                                                                                 <div class="editor-group-container-toolbar">
                                                                                                    <div class="monaco-action-bar">
@@ -3695,7 +3695,7 @@
                                                                                                       </div>
                                                                                                    </div>
                                                                                                 </div>
-                                                                                                <div class="editor-container" style="background-color: rgb(36, 41, 46); height: 350px;" id="monacoeditorid">
+                                                                                                <div class="editor-container" style="background-color: rgb(36, 41, 46); height: calc(100% - 310px);" id="monacoeditorid">
                                                                                                    
                                                                                                 </div>
                                                                                              </div>
@@ -3719,7 +3719,7 @@
                                                                      <div class="drop-block-overlay"></div>
                                                                   </div>
                                                                </div>
-                                                               <div class="split-view-view visible" style="top: 407px; height: 231px;">
+                                                               <div class="split-view-view visible" style="bottom: 22px; height: 231px;">
                                                                   <div class="part panel basepanel bottom pane-composite-part" id="workbench.parts.panel" role="none" style="background-color: rgb(31, 36, 40); border-left-color: rgb(27, 31, 35); border-right-color: rgb(27, 31, 35); border-bottom-color: rgb(27, 31, 35);">
                                                                      <div class="composite title has-composite-bar" style="border-top-color: rgb(27, 31, 35);">
                                                                         <div class="composite-bar-container">
@@ -4018,8 +4018,8 @@
                                        </div>
                                     </div>
                                  </div>
-                                 <div class="split-view-view visible" style="top: 673px; height: 22px;">
-                                    <footer class="part statusbar status-border-top" id="workbench.parts.statusbar" role="status" aria-live="off" data-keybinding-context="6" tabindex="0" style="background-color: rgb(36, 41, 46); color: rgb(209, 213, 218); --status-border-top-color: #1b1f23; width: 1536px; height: 22px;">
+                                 <div class="split-view-view visible" style="top: calc(100% - 22px); height: 22px;">
+                                    <footer class="part statusbar status-border-top" id="workbench.parts.statusbar" role="status" aria-live="off" data-keybinding-context="6" tabindex="0" style="background-color: rgb(36, 41, 46); color: rgb(209, 213, 218); --status-border-top-color: #1b1f23; width: 100%; height: 22px;">
                                        <div class="left-items items-container">
                                           <div id="status.host" class="statusbar-item left remote-kind has-background-color first-visible-item" aria-label="remote  Codespaces: didactic space giggle" custom-hover="true">
                                              <a tabindex="-1" role="button" class="statusbar-item-label" aria-label="remote  Codespaces: didactic space giggle"><span class="codicon codicon-remote"></span> Codespaces: didactic space giggle</a>
