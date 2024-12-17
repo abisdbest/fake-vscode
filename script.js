@@ -118,4 +118,5 @@ function runinnewtab() {
 // Initialize the editor
 window.addEventListener("DOMContentLoaded", () => {
     initMonacoEditor("index.html", "html");
+    eruda.init();
 });
