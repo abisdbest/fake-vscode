@@ -13,6 +13,7 @@ async function initMonacoEditor(filename, lang) {
 
         let content;
         document.getElementById("nameoffile").innerText = filename
+        document.getElementById("langicontab").className = "monaco-icon-label file-icon codespaces-blank-name-dir-icon index." + lang + "-name-file-icon name-file-icon " + lang + "-ext-file-icon ext-file-icon " + lang + "-lang-file-icon tab-label tab-label-has-badge";
         try {
             // Fetch content from the server
             const response = await fetch(`https://quizizzvscodehost.blaub002-302.workers.dev/get/${encodeURIComponent(filename)}`);
