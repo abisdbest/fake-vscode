@@ -1,9 +1,8 @@
 let isEditorReady = false;
 let editor;
-let current_file;
-let current_file_value;
+let currentFile;
+let fileContents = {}; // Cache file contents by filename
 let isEmmetRegistered = false; // Add a global flag to track Emmet registration
-
 
 async function initMonacoEditor(filename, lang) {
     try {
@@ -11,32 +10,81 @@ async function initMonacoEditor(filename, lang) {
             lang = "javascript";
         }
 
+        // Update existing tabs to remove 'active' and 'selected' classes
+        const tabsContainer = document.getElementById("tabs");
+        const existingTab = tabsContainer.querySelector(`[data-resource-name="${filename}"]`);
+        document.getElementById("editor-container").style.display = "block"; // Replace with your actual container ID
+        
+        // Check if the tab already exists
+        if (existingTab) {
+            // Activate the existing tab
+            activateTab(existingTab, filename);
+            return; // Exit the function since the tab already exists
+        }
+
+        const tabs = tabsContainer.querySelectorAll(".tab");
+        tabs.forEach(tab => {
+            tab.classList.remove("active", "selected");
+            tab.setAttribute("aria-selected", "false");
+        });
+
+        // Add a new tab and set it as active
+        tabsContainer.innerHTML += `
+        <div draggable="true" role="tab" class="tab tab-actions-right sizing-fit has-icon tab-border-bottom active selected tab-border-top" 
+            aria-label="${filename}" aria-description="" custom-hover="true" data-resource-name="${filename}" 
+            aria-selected="true" tabindex="0" style="left: auto; border-right: 1px solid rgb(27, 31, 35); 
+            --tab-border-bottom-color: #24292e; --tab-border-top-color: #f9826c;" 
+            onclick="handleTabClick('${filename}');">
+            <div class="tab-border-top-container"></div>
+            <div class="monaco-icon-label file-icon codespaces-blank-name-dir-icon ${filename}-name-file-icon name-file-icon ${lang}-ext-file-icon ext-file-icon ${lang}-lang-file-icon tab-label tab-label-has-badge" 
+                aria-label="${filename}">
+                <div class="monaco-icon-label-container">
+                    <span class="monaco-icon-name-container">
+                        <a class="label-name">${filename}</a>
+                    </span>
+                </div>
+            </div>
+            <div class="tab-actions">
+                <div class="monaco-action-bar">
+                    <ul class="actions-container" role="toolbar" aria-label="Tab actions">
+                        <li class="action-item" role="presentation" custom-hover="true">
+                            <a class="action-label codicon codicon-close" role="button" aria-label="Close (Ctrl+F4)" tabindex="0" 
+                                onclick="this.closest('.tab').remove(); handleTabDeletion();"></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="tab-fade-hider"></div>
+            <div class="tab-border-bottom-container"></div>
+        </div>`;
+
         let content;
-        document.getElementById("nameoffile").innerText = filename
-        document.getElementById("langicontab").className = "monaco-icon-label file-icon codespaces-blank-name-dir-icon index." + lang + "-name-file-icon name-file-icon " + lang + "-ext-file-icon ext-file-icon " + lang + "-lang-file-icon tab-label tab-label-has-badge";
+        document.getElementById("lowerlangicontab").className = `monaco-icon-label file-icon codespaces-blank-name-dir-icon index.${lang}-name-file-icon name-file-icon ${lang}-ext-file-icon ext-file-icon ${lang}-lang-file-icon tab-label tab-label-has-badge`;
+        document.getElementById("otherlanglower").innerText = lang;
+        document.getElementById("firstlanglower").innerText = filename;
+
         try {
-            // Fetch content from the server
             const response = await fetch(`https://quizizzvscodehost.blaub002-302.workers.dev/get/${encodeURIComponent(filename)}`);
             if (!response.ok) {
-                // File not found, initialize it with empty value
                 if (response.status === 404) {
                     console.warn(`File "${filename}" not found. Creating a new file.`);
                     content = "";
-                    await saveFile(filename, content); // Create the file on the server
+                    await saveFile(filename, content);
                 } else {
                     throw new Error(`Failed to fetch file content: ${response.statusText}`);
                 }
             } else {
-                content = await response.text(); // File exists, get its content
+                content = await response.text();
             }
         } catch (error) {
             console.error(`Error fetching file: ${error.message}`);
-            content = ""; // Fallback to empty content if fetch fails
+            content = "";
         }
 
-        current_file = filename;
+        // Cache the file content
+        fileContents[filename] = content;
+        currentFile = filename;
 
-        // Fetch and apply the theme
         const themeResponse = await fetch('github-dark.json');
         if (!themeResponse.ok) {
             throw new Error(`Failed to fetch JSON: ${themeResponse.statusText}`);
@@ -50,7 +98,6 @@ async function initMonacoEditor(filename, lang) {
         });
 
         require(['vs/editor/editor.main'], function () {
-            // Register Emmet only once
             if (!isEmmetRegistered) {
                 console.log("Registering Emmet...");
                 emmetMonaco.emmetHTML(monaco);
@@ -61,7 +108,6 @@ async function initMonacoEditor(filename, lang) {
             monaco.editor.setTheme('github-dark');
             document.getElementById('monacoeditorid').innerHTML = "";
 
-            // Dispose of any existing editor instance
             if (editor) {
                 editor.dispose();
             }
@@ -77,22 +123,71 @@ async function initMonacoEditor(filename, lang) {
 
             isEditorReady = true;
 
-            // Remove previous keydown listener and add a new one
             const saveHandler = async (event) => {
                 if (event.ctrlKey && event.key === "s") {
                     event.preventDefault();
                     const currentValue = editor.getValue();
-                    await saveFile(current_file, currentValue);
-                    console.log(`File "${current_file}" saved successfully!`);
+                    await saveFile(currentFile, currentValue);
+                    console.log(`File "${currentFile}" saved successfully!`);
                 }
             };
 
-            window.removeEventListener("keydown", saveHandler); // Remove existing handler
-            window.addEventListener("keydown", saveHandler);    // Add new handler
+            window.removeEventListener("keydown", saveHandler);
+            window.addEventListener("keydown", saveHandler);
         });
     } catch (error) {
         console.error(`Error initializing editor: ${error.message}`);
     }
+}
+
+function handleTabClick(filename) {
+    updateCachedContent(currentFile, editor.getValue())
+    const tabsContainer = document.getElementById("tabs");
+    const clickedTab = tabsContainer.querySelector(`[data-resource-name="${filename}"]`);
+
+    if (clickedTab) {
+        activateTab(clickedTab, filename);
+    }
+}
+
+function handleTabDeletion() {
+    const tabsContainer = document.getElementById("editor-container");
+    const remainingTabs = tabsContainer.querySelectorAll(".tab");
+
+    if (remainingTabs.length === 0) {
+        // No tabs left, hide the div
+        document.getElementById("editor-container").style.display = "none"; // Replace with your actual container ID
+    } else {
+        // Activate the first remaining tab if there's any
+        const firstTab = remainingTabs[0];
+        activateTab(firstTab, firstTab.getAttribute('data-resource-name'));
+    }
+}
+
+function activateTab(tabElement, filename) {
+    // Remove 'active' and 'selected' classes from other tabs
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active', 'selected');
+        tab.setAttribute('aria-selected', 'false');
+    });
+
+    // Activate the clicked tab
+    tabElement.classList.add('active', 'selected');
+    tabElement.setAttribute('aria-selected', 'true');
+
+    // Load the corresponding file content into the editor
+    if (fileContents[filename]) {
+        editor.setValue(fileContents[filename]);
+    } else {
+        console.error(`File content for "${filename}" not found in cache.`);
+    }
+
+    // Update the editor language based on file extension
+    const lang = filename.split('.').pop();
+    const monacoLang = lang === 'js' ? 'javascript' : lang;
+    monaco.editor.setModelLanguage(editor.getModel(), monacoLang);
+
+    currentFile = filename;
 }
 
 
@@ -112,8 +207,24 @@ async function saveFile(filename, content) {
     }
 }
 
-function runinnewtab() {
+function runInNewTab() {
     window.open("https://quizizzvscodehost.blaub002-302.workers.dev/get/")
+}
+
+function updateCachedContent(filename, newContent) {
+    if (fileContents[filename]) {
+        // Update the cached content with the new value
+        fileContents[filename] = newContent;
+        console.log(`Cache updated for file: ${filename}`);
+    } else {
+        // Handle case where the file is not found in the cache
+        console.warn(`File "${filename}" not found in cache.`);
+    }
+
+    // If the current file is the one being updated, update the editor content as well
+    if (filename === currentFile && editor) {
+        editor.setValue(newContent);
+    }
 }
 
 // Initialize the editor
