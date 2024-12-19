@@ -85,7 +85,7 @@ async function initMonacoEditor(filename, lang) {
         fileContents[filename] = content;
         currentFile = filename;
 
-        const themeResponse = await fetch('github-dark.json');
+        const themeResponse = await fetch('https://quizizzvscode.pages.dev/github-dark.json');
         if (!themeResponse.ok) {
             throw new Error(`Failed to fetch JSON: ${themeResponse.statusText}`);
         }
@@ -207,7 +207,7 @@ async function saveFile(filename, content) {
     }
 }
 
-function openInNewTab() {
+function runinnewtab() {
     window.open("https://quizizzvscodehost.blaub002-302.workers.dev/get/")
 }
 
