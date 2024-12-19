@@ -207,7 +207,7 @@ async function saveFile(filename, content) {
     }
 }
 
-function runInNewTab() {
+function openInNewTab() {
     window.open("https://quizizzvscodehost.blaub002-302.workers.dev/get/")
 }
 
