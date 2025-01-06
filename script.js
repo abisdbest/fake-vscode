@@ -14,7 +14,7 @@ async function initMonacoEditor(filename, lang) {
         const tabsContainer = document.getElementById("tabs");
         const existingTab = tabsContainer.querySelector(`[data-resource-name="${filename}"]`);
         document.getElementById("editor-container").style.display = "block"; // Replace with your actual container ID
-        
+
         // Check if the tab already exists
         if (existingTab) {
             // Activate the existing tab
@@ -156,7 +156,9 @@ function handleTabDeletion() {
 
     if (remainingTabs.length === 0) {
         // No tabs left, hide the div
-        document.getElementById("editor-container").style.display = "none"; // Replace with your actual container ID
+        document.getElementById("watermark-section").style.display = "block";
+        document.getElementById("file-icons").style.display = "none";
+        document.getElementById("monacoeditorid").style.display = "none";
     } else {
         // Activate the first remaining tab if there's any
         const firstTab = remainingTabs[0];
@@ -226,6 +228,28 @@ function updateCachedContent(filename, newContent) {
         editor.setValue(newContent);
     }
 }
+
+function toggleFolder(row) {
+    const twistie = row.querySelector('.monaco-tl-twistie');
+    const folderLevel = row.getAttribute('aria-level');
+    const listRows = row.closest('.monaco-list-rows').querySelectorAll(`.monaco-list-row[aria-level='${parseInt(folderLevel) + 1}']`);
+    
+    if (row.getAttribute('aria-expanded') === 'true') {
+      row.setAttribute('aria-expanded', 'false');
+      twistie.classList.add('collapsed');
+      listRows.forEach(function(item) {
+        item.style.display = 'none';
+      });
+    } else {
+      row.setAttribute('aria-expanded', 'true');
+      twistie.classList.remove('collapsed');
+      listRows.forEach(function(item) {
+        item.style.display = 'block';
+      });
+    }
+  }
+  
+
 
 // Initialize the editor
 window.addEventListener("DOMContentLoaded", () => {
