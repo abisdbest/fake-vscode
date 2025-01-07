@@ -233,26 +233,18 @@ function toggleFolder(row) {
     const twistie = row.querySelector('.monaco-tl-twistie');
     const folderLevel = row.getAttribute('aria-level');
     const listRows = row.closest('.monaco-list-rows').querySelectorAll(`.monaco-list-row[aria-level='${parseInt(folderLevel) + 1}']`);
-    
+
     if (row.getAttribute('aria-expanded') === 'true') {
-      row.setAttribute('aria-expanded', 'false');
-      twistie.classList.add('collapsed');
-      listRows.forEach(function(item) {
-        item.style.display = 'none';
-      });
+        row.setAttribute('aria-expanded', 'false');
+        twistie.classList.add('collapsed');
+        listRows.forEach(function (item) {
+            item.style.display = 'none';
+        });
     } else {
-      row.setAttribute('aria-expanded', 'true');
-      twistie.classList.remove('collapsed');
-      listRows.forEach(function(item) {
-        item.style.display = 'block';
-      });
+        row.setAttribute('aria-expanded', 'true');
+        twistie.classList.remove('collapsed');
+        listRows.forEach(function (item) {
+            item.style.display = 'block';
+        });
     }
-  }
-  
-
-
-// Initialize the editor
-window.addEventListener("DOMContentLoaded", () => {
-    initMonacoEditor("index.html", "html");
-    eruda.init();
-});
+}
