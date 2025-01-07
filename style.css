@@ -5825,7 +5825,7 @@
 
 .monaco-workbench .part.editor>.content .editor-group-container>.editor-group-watermark>.letterpress {
     aspect-ratio: 1/1;
-    background-image: url(../../media/letterpress-light.svg#quizizz);
+    background-image: url(../../media/letterpress-light.svg);
     background-position-x: center;
     background-repeat: no-repeat;
     background-size: contain;
@@ -5834,15 +5834,15 @@
 }
 
 .monaco-workbench.vs-dark .part.editor>.content .editor-group-container .editor-group-watermark>.letterpress {
-    background-image: url(../../media/letterpress-dark.svg#quizizz)
+    background-image: url(../../media/letterpress-dark.svg)
 }
 
 .monaco-workbench.hc-light .part.editor>.content .editor-group-container .editor-group-watermark>.letterpress {
-    background-image: url(../../media/letterpress-hcLight.svg#quizizz)
+    background-image: url(../../media/letterpress-hcLight.svg)
 }
 
 .monaco-workbench.hc-black .part.editor>.content .editor-group-container .editor-group-watermark>.letterpress {
-    background-image: url(../../media/letterpress-hcDark.svg#quizizz)
+    background-image: url(../../media/letterpress-hcDark.svg)
 }
 
 .monaco-workbench .part.editor>.content .editor-group-container.max-height-478px>.editor-group-watermark>.shortcuts,
