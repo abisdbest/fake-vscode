@@ -156,7 +156,7 @@ function handleTabDeletion() {
 
     if (remainingTabs.length === 0) {
         // No tabs left, hide the div
-        document.getElementById("watermark-section").style.display = "block";
+        document.getElementById("watermark-section").style.display = "flex";
         document.getElementById("file-icons").style.display = "none";
         document.getElementById("monacoeditorid").style.display = "none";
     } else {
@@ -231,37 +231,118 @@ function updateCachedContent(filename, newContent) {
 
 function toggleFolder(row) {
     const twistie = row.querySelector('.monaco-tl-twistie');
-    const folderLevel = row.getAttribute('aria-level');
-    const listRows = row.closest('.monaco-list-rows').querySelectorAll(`.monaco-list-row[aria-level='${parseInt(folderLevel) + 1}']`);
+    const folderLevel = parseInt(row.getAttribute('aria-level'));
+    const listRows = Array.from(row.closest('.monaco-list-rows').querySelectorAll('.monaco-list-row'));
+    let toggleMode = row.getAttribute('aria-expanded') === 'true' ? 'collapse' : 'expand';
 
-    if (row.getAttribute('aria-expanded') === 'true') {
+    // Toggle folder state
+    if (toggleMode === 'collapse') {
         row.setAttribute('aria-expanded', 'false');
         twistie.classList.add('collapsed');
-        listRows.forEach(function (item) {
-            item.style.display = 'none';
-        });
     } else {
         row.setAttribute('aria-expanded', 'true');
         twistie.classList.remove('collapsed');
-        listRows.forEach(function (item) {
-            item.style.display = 'block';
-        });
     }
+
+    // Traverse rows below the current folder
+    let shouldToggle = false;
+    listRows.forEach(function (item) {
+        const itemLevel = parseInt(item.getAttribute('aria-level'));
+
+        if (item === row) {
+            shouldToggle = true; // Start toggling after the clicked row
+            return;
+        }
+
+        if (shouldToggle) {
+            if (itemLevel <= folderLevel) {
+                shouldToggle = false; // Stop when encountering a row with the same or lower level
+                return;
+            }
+            // Toggle visibility based on folder state
+            item.style.display = toggleMode === 'collapse' ? 'none' : 'block';
+        }
+    });
 }
 
+
 function addfile() {
-    document.getElementById("allfilesandfolders").innerHTML += `<div class="monaco-list-row" onclick="this.classList.add('selected'); document.querySelectorAll('.monaco-list-row').forEach(row => { if (row !== this) row.classList.remove('selected'); }); initMonacoEditor(this.innerText, this.innerText.split('.').pop()); document.getElementById('watermark-section').style.display = 'none'; document.getElementById('file-icons').style.display = 'block'; document.getElementById('monacoeditorid').style.display = 'block';" role="treeitem" data-index="4" data-last-element="false" data-parity="even" aria-setsize="4" aria-posinset="2" id="list_id_2_4" aria-selected="false" aria-label="index.html" aria-level="1" draggable="true" style="position: relative; height: 22px; line-height: 22px;">
-                                                                                                <div class="monaco-tl-row">
-                                                                                                   <div class="monaco-tl-indent" style="width: 0px;"></div>
-                                                                                                   <div class="monaco-tl-twistie" style="padding-left: 8px;"></div>
-                                                                                                   <div class="monaco-tl-contents">
-                                                                                                      <div class="monaco-icon-label file-icon codespaces-blank-name-dir-icon index.html-name-file-icon name-file-icon html-ext-file-icon ext-file-icon html-lang-file-icon explorer-item" aria-label="/workspaces/codespaces-blank/index.html" custom-hover="true" style="display: flex;">
-                                                                                                         <div class="monaco-icon-label-container"><span class="monaco-icon-name-container"><a class="label-name"><span class="monaco-highlighted-label">index.html</span></a></span></div>
-                                                                                                      </div>
-                                                                                                   </div>
-                                                                                                </div>
-                                                                                             </div>`;
+    document.getElementById("allfilesandfolders").innerHTML += `<div class="monaco-list-row" role="treeitem" data-index="5" data-last-element="false" data-parity="odd"
+                                                                    aria-setsize="9" aria-posinset="3" id="list_id_2_5" aria-selected="false" aria-level="1" draggable="false"
+                                                                    style="position: relative; height: 22px; line-height: 22px;">
+                                                                    <div class="monaco-tl-row">
+                                                                        <div class="monaco-tl-indent" style="width: 0px;"></div>
+                                                                        <div class="monaco-tl-twistie" style="padding-left: 8px;"></div>
+                                                                        <div class="monaco-tl-contents">
+                                                                            <div
+                                                                            class="monaco-icon-label file-icon codespaces-blank-name-dir-icon name-file-icon ext-file-icon unknown-lang-file-icon explorer-item explorer-item-edited"
+                                                                            aria-label="/workspaces/codespaces-blank/ " custom-hover="true">
+                                                                            <div class="monaco-icon-label-container" style="display: none;">
+                                                                                <span class="monaco-icon-name-container"><a class="label-name"></a></span></div>
+                                                                            <div class="monaco-inputbox idle synthetic-focus"
+                                                                                style="background-color: var(--vscode-input-background); color: var(--vscode-input-foreground); border: 1px solid var(--vscode-input-border, transparent);">
+                                                                                <div class="ibwrapper">
+                                                                                    <input class="input empty" autocorrect="off" autocapitalize="off" spellcheck="false" type="text" wrap="off" aria-label="Type file name. Press Enter to confirm or Escape to cancel."
+                                                                                        style="background-color: inherit; color: var(--vscode-input-foreground);"
+                                                                                        fdprocessedid="ycd0b">
+                                                                                </div>
+                                                                            </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>`;
+
+    const allInputs = document.querySelectorAll("#allfilesandfolders .input");
+    const lastInput = allInputs[allInputs.length - 1];
+    const labelDiv = lastInput.closest(".monaco-icon-label");
+
+    lastInput.focus();
+
+    let confirmed = false; // Flag to check if Enter was pressed
+
+    // Handle typing to dynamically update the classes
+    lastInput.oninput = function () {
+        const fileName = lastInput.value.trim();
+        const ext = fileName.split('.').pop().toLowerCase();
+        
+        // Default class list for unknown file types
+        let classList = "monaco-icon-label file-icon codespaces-blank-name-dir-icon name-file-icon ext-file-icon unknown-lang-file-icon explorer-item";
+
+        if (ext === "css") {
+            classList = "monaco-icon-label file-icon codespaces-blank-name-dir-icon style.css-name-file-icon name-file-icon css-ext-file-icon ext-file-icon css-lang-file-icon explorer-item";
+        } else if (ext === "js") {
+            classList = "monaco-icon-label file-icon codespaces-blank-name-dir-icon script.js-name-file-icon name-file-icon js-ext-file-icon ext-file-icon javascript-lang-file-icon explorer-item";
+        } else if (ext === "html") {
+            classList = "monaco-icon-label file-icon codespaces-blank-name-dir-icon index.html-name-file-icon name-file-icon html-ext-file-icon ext-file-icon html-lang-file-icon explorer-item";
+        }
+        
+        // Update the class list of the label div
+        labelDiv.className = classList;
+    };
+
+    // Handle Enter key to replace input with span
+    lastInput.onkeydown = function (e) {
+        if (e.key === "Enter" && lastInput.value.trim() !== "") {
+            confirmed = true; // Set the flag to true
+            const inputValue = lastInput.value.trim();
+            
+            // Replace input with span showing the entered text
+            lastInput.parentElement.innerHTML = `<span class="monaco-highlighted-label">${inputValue}</span>`;
+            
+        }
+    };
+
+    // Handle blur event to remove the div if Enter was not pressed
+    lastInput.onblur = function () {
+        if (!confirmed) { // Only remove if Enter wasn't pressed
+            const parentDiv = lastInput.closest(".monaco-list-row");
+            if (parentDiv) {
+                parentDiv.remove();
+            }
+        }
+    };
 }
+
 
 function addfolder() {
     document.getElementById("allfilesandfolders").innerHTML += `<div class="monaco-list-row" onclick="this.classList.add('selected'); document.querySelectorAll('.monaco-list-row').forEach(row => { if (row !== this) row.classList.remove('selected'); }); toggleFolder(this);" role="treeitem" data-index="0" data-last-element="false" data-parity="even" aria-setsize="4" aria-posinset="1" id="list_id_2_0" aria-selected="false" aria-label="scripts" aria-level="1" aria-expanded="false" draggable="true" style="position: relative; height: 22px; line-height: 22px;">
