@@ -248,3 +248,13 @@ function toggleFolder(row) {
         });
     }
 }
+
+
+
+// Initialize the editor
+window.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("watermark-section").style.display = "block";
+    document.getElementById("file-icons").style.display = "none";
+    document.getElementById("monacoeditorid").style.display = "none";
+    eruda.init();
+});
