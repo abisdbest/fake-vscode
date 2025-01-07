@@ -249,6 +249,34 @@ function toggleFolder(row) {
     }
 }
 
+function addfile() {
+    document.getElementById("allfilesandfolders").innerHTML += `<div class="monaco-list-row" onclick="this.classList.add('selected'); document.querySelectorAll('.monaco-list-row').forEach(row => { if (row !== this) row.classList.remove('selected'); }); initMonacoEditor(this.innerText, this.innerText.split('.').pop()); document.getElementById('watermark-section').style.display = 'none'; document.getElementById('file-icons').style.display = 'block'; document.getElementById('monacoeditorid').style.display = 'block';" role="treeitem" data-index="4" data-last-element="false" data-parity="even" aria-setsize="4" aria-posinset="2" id="list_id_2_4" aria-selected="false" aria-label="index.html" aria-level="1" draggable="true" style="position: relative; height: 22px; line-height: 22px;">
+                                                                                                <div class="monaco-tl-row">
+                                                                                                   <div class="monaco-tl-indent" style="width: 0px;"></div>
+                                                                                                   <div class="monaco-tl-twistie" style="padding-left: 8px;"></div>
+                                                                                                   <div class="monaco-tl-contents">
+                                                                                                      <div class="monaco-icon-label file-icon codespaces-blank-name-dir-icon index.html-name-file-icon name-file-icon html-ext-file-icon ext-file-icon html-lang-file-icon explorer-item" aria-label="/workspaces/codespaces-blank/index.html" custom-hover="true" style="display: flex;">
+                                                                                                         <div class="monaco-icon-label-container"><span class="monaco-icon-name-container"><a class="label-name"><span class="monaco-highlighted-label">index.html</span></a></span></div>
+                                                                                                      </div>
+                                                                                                   </div>
+                                                                                                </div>
+                                                                                             </div>`;
+}
+
+function addfolder() {
+    document.getElementById("allfilesandfolders").innerHTML += `<div class="monaco-list-row" onclick="this.classList.add('selected'); document.querySelectorAll('.monaco-list-row').forEach(row => { if (row !== this) row.classList.remove('selected'); }); toggleFolder(this);" role="treeitem" data-index="0" data-last-element="false" data-parity="even" aria-setsize="4" aria-posinset="1" id="list_id_2_0" aria-selected="false" aria-label="scripts" aria-level="1" aria-expanded="false" draggable="true" style="position: relative; height: 22px; line-height: 22px;">
+                                                                                                <div class="monaco-tl-row">
+                                                                                                   <div class="monaco-tl-indent" style="width: 0px;"></div>
+                                                                                                   <div class="monaco-tl-twistie collapsible codicon codicon-tree-item-expanded collapsed" style="padding-left: 8px;"></div>
+                                                                                                   <div class="monaco-tl-contents">
+                                                                                                      <div class="monaco-icon-label folder-icon codespaces-blank-name-dir-icon scripts-name-folder-icon explorer-item" aria-label="/workspaces/codespaces-blank/scripts" custom-hover="true" style="display: flex;">
+                                                                                                         <div class="monaco-icon-label-container"><span class="monaco-icon-name-container"><a class="label-name"><span class="monaco-highlighted-label">scripts</span></a></span></div>
+                                                                                                      </div>
+                                                                                                   </div>
+                                                                                                </div>
+                                                                                             </div>`;
+}
+
 
 // Initialize the editor
 window.addEventListener("DOMContentLoaded", () => {
