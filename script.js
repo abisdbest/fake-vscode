@@ -250,7 +250,6 @@ function toggleFolder(row) {
 }
 
 
-
 // Initialize the editor
 window.addEventListener("DOMContentLoaded", () => {
     eruda.init();
