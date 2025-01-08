@@ -361,5 +361,10 @@ function addfolder() {
 
 // Initialize the editor
 window.addEventListener("DOMContentLoaded", () => {
+    const contents = document.querySelectorAll('.content');
+    contents.forEach((el) => {
+        el.style.display = 'block'; // Example action for all .content elements
+    });
+
     eruda.init();
 });
