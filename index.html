@@ -100,7 +100,7 @@
                                                                <div class="monaco-action-bar vertical">
                                                                   <ul class="actions-container" role="tablist" aria-label="Active View Switcher">
                                                                      <li class="action-item icon checked" role="tab" draggable="true" aria-label="Explorer (Ctrl+Shift+E)" aria-expanded="true" aria-selected="true" tabindex="0" style="--insert-border-color: #e1e4e8;">
-                                                                        <a class="action-label codicon codicon-explorer-view-icon" aria-label="Explorer (Ctrl+Shift+E)" style="color: rgb(225, 228, 232);" onclick="document.getElementById('fileexplorertab').style.display = 'block'; document.getElementById('committab').style.display = 'none';"></a>
+                                                                        <a class="action-label codicon codicon-explorer-view-icon" aria-label="Explorer (Ctrl+Shift+E)" style="color: rgb(225, 228, 232);" onclick="switchtab('explorer')"></a>
                                                                         <div class="badge" aria-label="Explorer (Ctrl+Shift+E)" style="display: none;" aria-hidden="true">
                                                                            <div class="badge-content" style="color: rgb(255, 255, 255); background-color: rgb(3, 102, 214);"></div>
                                                                         </div>
@@ -114,7 +114,7 @@
                                                                         <div class="active-item-indicator"></div>
                                                                      </li>
                                                                      <li class="action-item icon" role="tab" draggable="true" aria-label="Source Control (Ctrl+Shift+G)" aria-expanded="false" aria-selected="false" style="--insert-border-color: #e1e4e8;">
-                                                                        <a class="action-label codicon codicon-source-control-view-icon" aria-label="Source Control (Ctrl+Shift+G)" style="color: rgb(106, 115, 125);" onclick="document.getElementById('fileexplorertab').style.display = 'none'; document.getElementById('committab').style.display = 'block';"></a>
+                                                                        <a class="action-label codicon codicon-source-control-view-icon" aria-label="Source Control (Ctrl+Shift+G)" style="color: rgb(106, 115, 125);" onclick="switchtab('commit')"></a>
                                                                         <div class="badge" aria-label="Source Control (Ctrl+Shift+G)" style="display: none;" aria-hidden="true">
                                                                            <div class="badge-content" style="color: rgb(255, 255, 255); background-color: rgb(3, 102, 214);"></div>
                                                                         </div>
@@ -796,7 +796,7 @@
                                                             <div class="monaco-scrollable-element " role="presentation" style="position: relative; overflow: hidden;">
                                                                <div class="split-view-container" style="overflow: hidden;">
                                                                   <div class="split-view-view visible" style="top: 0px; height: calc(100%); width: 100%;">
-                                                                     <div class="part editor" id="workbench.parts.editor" role="main">
+                                                                     <div class="part editor" id="workbench.parts.editor" role="main" style="height: 100%;">
                                                                         <div class="content" data-keybinding-context="2" style="overflow: hidden; background-color: rgb(36, 41, 46); width: calc(100% - 270px); height: calc(100%);">
                                                                            <div class="grid-view-container">
                                                                               <div class="monaco-grid-view">

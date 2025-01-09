@@ -306,14 +306,14 @@ function addfile() {
         const ext = fileName.split('.').pop().toLowerCase();
         
         // Default class list for unknown file types
-        let classList = "monaco-icon-label file-icon codespaces-blank-name-dir-icon name-file-icon ext-file-icon unknown-lang-file-icon explorer-item";
+        let classList = `monaco-icon-label file-icon codespaces-blank-name-dir-icon ${fileName}-name-file-icon ${ext}ext-file-icon ${ext}-lang-file-icon explorer-item`;
 
-        if (ext === "css") {
-            classList = "monaco-icon-label file-icon codespaces-blank-name-dir-icon style.css-name-file-icon name-file-icon css-ext-file-icon ext-file-icon css-lang-file-icon explorer-item";
-        } else if (ext === "js") {
+        if (ext === "js") {
             classList = "monaco-icon-label file-icon codespaces-blank-name-dir-icon script.js-name-file-icon name-file-icon js-ext-file-icon ext-file-icon javascript-lang-file-icon explorer-item";
-        } else if (ext === "html") {
-            classList = "monaco-icon-label file-icon codespaces-blank-name-dir-icon index.html-name-file-icon name-file-icon html-ext-file-icon ext-file-icon html-lang-file-icon explorer-item";
+        } else if (ext === "py") {
+            classList = "monaco-icon-label file-icon codespaces-blank-name-dir-icon index.py-name-file-icon name-file-icon python-ext-file-icon ext-file-icon python-lang-file-icon explorer-item";
+        } else if (ext === "sh") {
+            classList = "monaco-icon-label file-icon codespaces-blank-name-dir-icon index.sh-name-file-icon name-file-icon bash-ext-file-icon ext-file-icon bash-lang-file-icon explorer-item";
         }
         
         // Update the class list of the label div
@@ -358,6 +358,15 @@ function addfolder() {
                                                                                              </div>`;
 }
 
+function switchtab(tab) {
+    if (tab == "explorer") {
+        document.getElementById('fileexplorertab').style.display = 'block';
+        document.getElementById('committab').style.display = 'none';
+    } else if (tab == "commit") {
+        document.getElementById('fileexplorertab').style.display = 'none';
+        document.getElementById('committab').style.display = 'block';
+    }
+}
 
 // Initialize the editor
 window.addEventListener("DOMContentLoaded", () => {
