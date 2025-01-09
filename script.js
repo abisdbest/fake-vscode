@@ -1,4 +1,5 @@
 let isEditorReady = false;
+let currentProject = "example";
 let editor;
 let currentFile;
 let fileContents = {}; // Cache file contents by filename
@@ -267,7 +268,7 @@ function toggleFolder(row) {
 
 
 function addfile() {
-    document.getElementById("allfilesandfolders").innerHTML += `<div class="monaco-list-row" role="treeitem" data-index="5" data-last-element="false" data-parity="odd"
+    document.getElementById("allfilesandfolders").innerHTML += `<div onclick="this.classList.add('selected'); document.querySelectorAll('.monaco-list-row').forEach(row => { if (row !== this) row.classList.remove('selected'); }); initMonacoEditor(this.innerText, this.innerText.split('.').pop()); document.getElementById('watermark-section').style.display = 'none'; document.getElementById('file-icons').style.display = 'block'; document.getElementById('monacoeditorid').style.display = 'block';" class="monaco-list-row" role="treeitem" data-index="5" data-last-element="false" data-parity="odd"
                                                                     aria-setsize="9" aria-posinset="3" id="list_id_2_5" aria-selected="false" aria-level="1" draggable="false"
                                                                     style="position: relative; height: 22px; line-height: 22px;">
                                                                     <div class="monaco-tl-row">
@@ -325,10 +326,15 @@ function addfile() {
         if (e.key === "Enter" && lastInput.value.trim() !== "") {
             confirmed = true; // Set the flag to true
             const inputValue = lastInput.value.trim();
+
+            lastInput.parentElement.parentElement.classList.remove("synthetic-focus");
+            lastInput.parentElement.parentElement.style.backgroundColor = "transparent";
+            lastInput.parentElement.parentElement.style.border = "none";
             
             // Replace input with span showing the entered text
-            lastInput.parentElement.innerHTML = `<span class="monaco-highlighted-label">${inputValue}</span>`;
+            lastInput.parentElement.innerHTML = `<div class="monaco-icon-label-container" style="height: 22px;"><span class="monaco-icon-name-container"><a class="label-name"><span class="monaco-highlighted-label" style="height: 22px; display: block; padding-top: 2px;">${inputValue}</span></a></span></div>`;
             
+            saveFile(inputValue, "");
         }
     };
 
