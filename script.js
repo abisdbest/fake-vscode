@@ -1,5 +1,5 @@
 let isEditorReady = false;
-let currentProject = "example";
+let currentProject = "exampleproject"; 
 let editor;
 let currentFile;
 let fileContents = {}; // Cache file contents by filename
@@ -65,7 +65,7 @@ async function initMonacoEditor(filename, lang) {
         document.getElementById("firstlanglower").innerText = filename;
 
         try {
-            const response = await fetch(`https://quizizzvscodehost.blaub002-302.workers.dev/get/${encodeURIComponent(filename)}`);
+            const response = await fetch(`https://quizizzvscodehost.blaub002-302.workers.dev/get/${currentProject}/${encodeURIComponent(filename)}`);
             if (!response.ok) {
                 if (response.status === 404) {
                     console.warn(`File "${filename}" not found. Creating a new file.`);
@@ -130,6 +130,7 @@ async function initMonacoEditor(filename, lang) {
                     const currentValue = editor.getValue();
                     await saveFile(currentFile, currentValue);
                     console.log(`File "${currentFile}" saved successfully!`);
+                    updateCachedContent(currentFile, currentValue);
                 }
             };
 
@@ -198,7 +199,7 @@ function activateTab(tabElement, filename) {
 async function saveFile(filename, content) {
     const formData = new FormData();
     formData.append("file", new Blob([content]), filename);
-    formData.append("filename", filename);
+    formData.append("filename", currentProject + "/" + filename);
 
     const response = await fetch("https://quizizzvscodehost.blaub002-302.workers.dev/upload", {
         method: "POST",
@@ -211,7 +212,7 @@ async function saveFile(filename, content) {
 }
 
 function runinnewtab() {
-    window.open("https://quizizzvscodehost.blaub002-302.workers.dev/get/")
+    window.open("https://quizizzvscodehost.blaub002-302.workers.dev/get/" + currentProject + "/")
 }
 
 function updateCachedContent(filename, newContent) {
