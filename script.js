@@ -1,5 +1,5 @@
 let isEditorReady = false;
-let currentProject = "exampleproject"; 
+let currentProject = "exampleproject";
 let editor;
 let currentFile;
 let fileContents = {}; // Cache file contents by filename
@@ -306,7 +306,7 @@ function addfile() {
     lastInput.oninput = function () {
         const fileName = lastInput.value.trim();
         const ext = fileName.split('.').pop().toLowerCase();
-        
+
         // Default class list for unknown file types
         let classList = `monaco-icon-label file-icon codespaces-blank-name-dir-icon ${fileName}-name-file-icon ${ext}ext-file-icon ${ext}-lang-file-icon explorer-item`;
 
@@ -317,7 +317,7 @@ function addfile() {
         } else if (ext === "sh") {
             classList = "monaco-icon-label file-icon codespaces-blank-name-dir-icon index.sh-name-file-icon name-file-icon bash-ext-file-icon ext-file-icon bash-lang-file-icon explorer-item";
         }
-        
+
         // Update the class list of the label div
         labelDiv.className = classList;
     };
@@ -331,10 +331,10 @@ function addfile() {
             lastInput.parentElement.parentElement.classList.remove("synthetic-focus");
             lastInput.parentElement.parentElement.style.backgroundColor = "transparent";
             lastInput.parentElement.parentElement.style.border = "none";
-            
+
             // Replace input with span showing the entered text
             lastInput.parentElement.innerHTML = `<div class="monaco-icon-label-container" style="height: 22px;"><span class="monaco-icon-name-container"><a class="label-name"><span class="monaco-highlighted-label" style="height: 22px; display: block; padding-top: 2px;">${inputValue}</span></a></span></div>`;
-            
+
             saveFile(inputValue, "");
         }
     };
@@ -381,6 +381,55 @@ window.addEventListener("DOMContentLoaded", () => {
     contents.forEach((el) => {
         el.style.display = 'block'; // Example action for all .content elements
     });
+    async function fetchAndCreateDirectoryStructure(url) {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const jsonData = await response.json();
+            const mainDiv = document.getElementById('output');
+            if (mainDiv) {
+                createDirectoryStructure(jsonData, mainDiv, 1); // Start at level 1
+            } else {
+                console.error("Could not find a div with the id 'output'. Please add a div with this ID to your HTML.");
+            }
+        } catch (error) {
+            const mainDiv = document.getElementById('allfilesandfolders');
+            if (mainDiv) {
+                mainDiv.innerHTML = `<p>Error fetching or parsing JSON: ${error.message}</p>`;
+            } else {
+                console.error("Could not find a div with the id 'output'. Please add a div with this ID to your HTML.", error);
+            }
+        }
+    }
 
+    function createDirectoryStructure(data, parentDiv, level) {
+        for (const [key, value] of Object.entries(data)) {
+            const div = document.createElement('div');
+            div.innerHTML = (typeof value === 'string' ? `<div class="monaco-list-row" onclick="this.classList.add('selected'); document.querySelectorAll('.monaco-list-row').forEach(row => { if (row !== this) row.classList.remove('selected'); }); initMonacoEditor(this.innerText, this.innerText.split('.').pop()); document.getElementById('watermark-section').style.display = 'none'; document.getElementById('file-icons').style.display = 'block'; document.getElementById('monacoeditorid').style.display = 'block';" role="treeitem" data-index="4" data-last-element="false" data-parity="even" aria-setsize="4" aria-posinset="2" id="list_id_2_4" aria-selected="false" aria-label="${key}" aria-level="${level}" draggable="true" style="position: relative; height: 22px; line-height: 22px;">
+                                                                                                    <div class="monaco-tl-row">
+                                                                                                        <div class="monaco-tl-indent" style="width: 0px;"></div>
+                                                                                                        <div class="monaco-tl-twistie" style="padding-left: 8px;"></div>
+                                                                                                        <div class="monaco-tl-contents">
+                                                                                                            <div class="monaco-icon-label file-icon codespaces-blank-name-dir-icon ${key}-name-file-icon name-file-icon ${key.split(".").pop()}-ext-file-icon ext-file-icon ${key.split(".").pop()}-lang-file-icon explorer-item" aria-label="/workspaces/codespaces-blank/${key}" custom-hover="true" style="display: flex;">
+                                                                                                                <div class="monaco-icon-label-container"><span class="monaco-icon-name-container"><a class="label-name"><span class="monaco-highlighted-label">${key}</span></a></span></div>
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                    </div>` : `Folder: `); //Simplified innerHTML
+
+            parentDiv.appendChild(div);
+
+            if (typeof value === 'object') {
+                createDirectoryStructure(value, parentDiv, level + 1);
+            }
+        }
+    }
+
+    eruda.init()
+
+    const serverUrl = 'https://quizizzvscodehost.blaub002-302.workers.dev/project/exampleproject'; // Replace with your server URL
+    fetchAndCreateDirectoryStructure(serverUrl);
     eruda.init();
 });
