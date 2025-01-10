@@ -315,7 +315,11 @@ function addfile() {
         } else if (ext === "py") {
             classList = "monaco-icon-label file-icon codespaces-blank-name-dir-icon index.py-name-file-icon name-file-icon python-ext-file-icon ext-file-icon python-lang-file-icon explorer-item";
         } else if (ext === "sh") {
-            classList = "monaco-icon-label file-icon codespaces-blank-name-dir-icon index.sh-name-file-icon name-file-icon bash-ext-file-icon ext-file-icon bash-lang-file-icon explorer-item";
+            classList = "monaco-icon-label file-icon codespaces-blank-name-dir-icon index.sh-name-file-icon name-file-icon shellscript-ext-file-icon ext-file-icon shellscript-lang-file-icon explorer-item";
+        } else if (ext === "cs") {
+            classList = "monaco-icon-label file-icon codespaces-blank-name-dir-icon index.cs-name-file-icon name-file-icon csharp-ext-file-icon ext-file-icon csharp-lang-file-icon explorer-item";
+        } else if (ext === "png" || ext === "jpg" || ext === "jpeg" || ext === "gif" || ext === "svg" || ext === "ico" || ext === "webp" || ext === "bmp" || ext === "tiff" || ext === "tif" || ext === "psd") {
+            classList = "monaco-icon-label file-icon codespaces-blank-name-dir-icon hi.png-name-file-icon name-file-icon png-ext-file-icon ext-file-icon unknown-lang-file-icon explorer-item monaco-decoration-itemColor--ec98p9 monaco-decoration-itemBadge--ec98p9 monaco-decoration-iconBadge--ec98p9";
         }
 
         // Update the class list of the label div
@@ -402,17 +406,45 @@ async function fetchAndCreateDirectoryStructure(url) {
 function createDirectoryStructure(data, parentDiv, level) {
     for (const [key, value] of Object.entries(data)) {
         const div = document.createElement('div');
+        lang = key.split('.').pop();
+
+        if (lang === "js") {
+            lang = "javascript";
+        } else if (lang === "py") {
+            lang = "python";
+        } else if (lang === "sh") {
+            lang = "shellscript";
+        } else if (lang === "cs") {
+            lang = "csharp";
+        }
+        
         div.innerHTML = (typeof value === 'string' ? `<div class="monaco-list-row" onclick="this.classList.add('selected'); document.querySelectorAll('.monaco-list-row').forEach(row => { if (row !== this) row.classList.remove('selected'); }); initMonacoEditor(this.innerText, this.innerText.split('.').pop()); document.getElementById('watermark-section').style.display = 'none'; document.getElementById('file-icons').style.display = 'block'; document.getElementById('monacoeditorid').style.display = 'block';" role="treeitem" data-index="4" data-last-element="false" data-parity="even" aria-setsize="4" aria-posinset="2" id="list_id_2_4" aria-selected="false" aria-label="${key}" aria-level="${level}" draggable="true" style="position: relative; height: 22px; line-height: 22px;">
                                                                                                     <div class="monaco-tl-row">
                                                                                                         <div class="monaco-tl-indent" style="width: 0px;"></div>
                                                                                                         <div class="monaco-tl-twistie" style="padding-left: 8px;"></div>
                                                                                                         <div class="monaco-tl-contents">
-                                                                                                            <div class="monaco-icon-label file-icon codespaces-blank-name-dir-icon ${key}-name-file-icon name-file-icon ${key.split(".").pop()}-ext-file-icon ext-file-icon ${key.split(".").pop()}-lang-file-icon explorer-item" aria-label="/workspaces/codespaces-blank/${key}" custom-hover="true" style="display: flex;">
+                                                                                                            <div class="monaco-icon-label file-icon codespaces-blank-name-dir-icon ${key}-name-file-icon name-file-icon ${lang}-ext-file-icon ext-file-icon ${lang}-lang-file-icon explorer-item" aria-label="/workspaces/codespaces-blank/${key}" custom-hover="true" style="display: flex;">
                                                                                                                 <div class="monaco-icon-label-container"><span class="monaco-icon-name-container"><a class="label-name"><span class="monaco-highlighted-label">${key}</span></a></span></div>
                                                                                                             </div>
                                                                                                         </div>
                                                                                                     </div>
-                                                                                                    </div>` : `Folder: `); //Simplified innerHTML
+                                                                                                    </div>` : `<div class="monaco-list-row" onclick="this.classList.add('selected'); document.querySelectorAll('.monaco-list-row').forEach(row => { if (row !== this) row.classList.remove('selected'); }); toggleFolder(this);" role="treeitem" data-index="0" data-last-element="false" data-parity="even" aria-setsize="4" aria-posinset="1" id="list_id_2_0" aria-selected="false" aria-label="scripts" aria-level="1" aria-expanded="false" draggable="true" style="position: relative; height: 22px; line-height: 22px;">
+                                                                                                   <div class="monaco-tl-row">
+                                                                                                      <div class="monaco-tl-indent" style="width: 0px;"></div>
+                                                                                                      <div class="monaco-tl-twistie collapsible codicon codicon-tree-item-expanded collapsed" style="padding-left: 8px;"></div>
+                                                                                                      <div class="monaco-tl-contents">
+                                                                                                         <div class="monaco-icon-label folder-icon codespaces-blank-name-dir-icon scripts-name-folder-icon explorer-item" aria-label="/workspaces/codespaces-blank/scripts" custom-hover="true" style="display: flex;">
+                                                                                                            <div class="monaco-icon-label-container"><span class="monaco-icon-name-container"><a class="label-name"><span class="monaco-highlighted-label">${key}</span></a></span></div>
+                                                                                                         </div>
+                                                                                                      </div>
+                                                                                                   </div>
+                                                                                                </div>`);
+                                                                                            
+        if (level > 1) {
+            div.getElementsByClassName("monaco-list-row")[0].style.display = 'none';
+            div.getElementsByClassName("monaco-tl-twistie")[0].style.paddingLeft = `${level * 10}px`;
+            div.getElementsByClassName("monaco-tl-indent")[0].innerHTML = `<div class="monaco-tl-indent" style="width: 8px;"></div>`;
+        }
 
         parentDiv.appendChild(div);
 
