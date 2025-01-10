@@ -131,6 +131,7 @@ async function initMonacoEditor(filename, lang) {
                     await saveFile(currentFile, currentValue);
                     console.log(`File "${currentFile}" saved successfully!`);
                     updateCachedContent(currentFile, currentValue);
+                    alert(currentFile, currentValue)
                 }
             };
 
@@ -144,7 +145,6 @@ async function initMonacoEditor(filename, lang) {
 
 function handleTabClick(filename) {
     updateCachedContent(currentFile, editor.getValue())
-    alert(currentFile, editor.getValue())
     const tabsContainer = document.getElementById("tabs");
     const clickedTab = tabsContainer.querySelector(`[data-resource-name="${filename}"]`);
 
