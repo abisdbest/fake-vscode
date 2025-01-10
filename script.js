@@ -144,6 +144,7 @@ async function initMonacoEditor(filename, lang) {
 
 function handleTabClick(filename) {
     updateCachedContent(currentFile, editor.getValue())
+    alert(currentFile, editor.getValue())
     const tabsContainer = document.getElementById("tabs");
     const clickedTab = tabsContainer.querySelector(`[data-resource-name="${filename}"]`);
 
