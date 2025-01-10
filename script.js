@@ -126,12 +126,11 @@ async function initMonacoEditor(filename, lang) {
 
             const saveHandler = async (event) => {
                 if (event.ctrlKey && event.key === "s") {
+                    updateCachedContent(currentFile, currentValue);
                     event.preventDefault();
                     const currentValue = editor.getValue();
                     await saveFile(currentFile, currentValue);
                     console.log(`File "${currentFile}" saved successfully!`);
-                    updateCachedContent(currentFile, currentValue);
-                    alert(currentFile, currentValue)
                 }
             };
 
