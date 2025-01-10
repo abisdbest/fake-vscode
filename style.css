@@ -38480,7 +38480,7 @@ body.web {
 }
 
 .monaco-list.list_id_2 .monaco-list-row.focused:hover {
-    background-color: var(--vscode-list-inactiveFocusBackground);
+    background-color: var(--vscode-list-inactiveFocusBackground)  !important;
 }
 
 .monaco-list.list_id_2 .monaco-list-row.selected {
