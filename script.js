@@ -131,6 +131,7 @@ async function initMonacoEditor(filename, lang) {
                     await saveFile(currentFile, currentValue);
                     console.log(`File "${currentFile}" saved successfully!`);
                     updateCachedContent(currentFile, currentValue);
+                    alert(currentFile, currentValue)
                 }
             };
 
