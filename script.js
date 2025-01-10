@@ -383,7 +383,7 @@ async function fetchAndCreateDirectoryStructure(url) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const jsonData = await response.json();
-        const mainDiv = document.getElementById('output');
+        const mainDiv = document.getElementById('allfilesandfolders');
         if (mainDiv) {
             createDirectoryStructure(jsonData, mainDiv, 1); // Start at level 1
         } else {
