@@ -234,7 +234,7 @@ function updateCachedContent(filename, newContent) {
 function toggleFolder(row) {
     const twistie = row.querySelector('.monaco-tl-twistie');
     const folderLevel = parseInt(row.getAttribute('aria-level'));
-    const listRows = Array.from(row.closest('.monaco-list-rows').querySelectorAll('.monaco-list-row'));
+    const listRows = Array.from(row.closest('.monaco-list-rows').querySelectorAll('div .monaco-list-row'));
     let toggleMode = row.getAttribute('aria-expanded') === 'true' ? 'collapse' : 'expand';
 
     // Toggle folder state
@@ -261,15 +261,58 @@ function toggleFolder(row) {
                 shouldToggle = false; // Stop when encountering a row with the same or lower level
                 return;
             }
+            else if (toggleMode == "expand" && itemLevel != folderLevel + 1) {
+                return; // Skip rows with higher level
+            }
+            // if (item.classList.contains('monaco-list-folder') && toggleMode === 'collapse' && item.getAttribute('aria-expanded') === 'true') {
+            //     toggleFolder(item); // Recursively toggle nested folders
+            // }
             // Toggle visibility based on folder state
-            item.style.display = toggleMode === 'collapse' ? 'none' : 'block';
+            item.style.display = toggleMode === 'expand' ? 'block' : 'none';
         }
     });
 }
 
 
 function addfile() {
-    document.getElementById("allfilesandfolders").innerHTML += `<div onclick="this.classList.add('selected'); document.querySelectorAll('.monaco-list-row').forEach(row => { if (row !== this) row.classList.remove('selected'); }); initMonacoEditor(this.innerText, this.innerText.split('.').pop()); document.getElementById('watermark-section').style.display = 'none'; document.getElementById('file-icons').style.display = 'block'; document.getElementById('monacoeditorid').style.display = 'block';" class="monaco-list-row" role="treeitem" data-index="5" data-last-element="false" data-parity="odd"
+
+    const selectedElement = document.querySelector('.selected.monaco-list-folder');
+
+    if (selectedElement) {
+        // If an element with both classes exists, insert the new HTML after it
+        if (selectedElement.getAttribute('aria-expanded') === 'false') {
+            selectedElement.click();
+        }
+        selectedElement.insertAdjacentHTML('afterend', `<div>
+            <div onclick="this.classList.add('selected'); document.querySelectorAll('.monaco-list-row').forEach(row => { if (row !== this) row.classList.remove('selected'); }); initMonacoEditor(this.getAttribute('data-filepath'), this.innerText.split('.').pop()); document.getElementById('watermark-section').style.display = 'none'; document.getElementById('file-icons').style.display = 'block'; document.getElementById('monacoeditorid').style.display = 'block';" class="monaco-list-row" role="treeitem" data-index="5" data-last-element="false" data-parity="odd"
+                                                                            aria-setsize="9" aria-posinset="3" aria-selected="false" aria-level="${Number(selectedElement.ariaLevel) + 1}" draggable="false"
+                                                                            style="position: relative; height: 22px; line-height: 22px;">
+                                                                            <div class="monaco-tl-row">
+                                                                                <div class="monaco-tl-indent" style="width: 0px;"></div>
+                                                                                <div class="monaco-tl-twistie" style="padding-left: ${(Number(selectedElement.ariaLevel) + 1) * 10}px;"></div>
+                                                                                <div class="monaco-tl-contents">
+                                                                                    <div
+                                                                                    class="monaco-icon-label file-icon codespaces-blank-name-dir-icon name-file-icon ext-file-icon unknown-lang-file-icon explorer-item explorer-item-edited"
+                                                                                    aria-label="/workspaces/codespaces-blank/ " custom-hover="true">
+                                                                                    <div class="monaco-icon-label-container" style="display: none;">
+                                                                                        <span class="monaco-icon-name-container"><a class="label-name">hello</a></span></div>
+                                                                                    <div class="monaco-inputbox idle synthetic-focus"
+                                                                                        style="background-color: var(--vscode-input-background); color: var(--vscode-input-foreground); border: 1px solid var(--vscode-input-border, transparent);">
+                                                                                        <div class="ibwrapper">
+                                                                                            <input class="input empty" autocorrect="off" autocapitalize="off" spellcheck="false" type="text" wrap="off" aria-label="Type file name. Press Enter to confirm or Escape to cancel."
+                                                                                                style="background-color: inherit; color: var(--vscode-input-foreground);"
+                                                                                                fdprocessedid="ycd0b">
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+        </div>`);
+    } else {
+        // If no selected element, append to the main div directly
+        document.getElementById("allfilesandfolders").innerHTML += `<div onclick="this.classList.add('selected'); document.querySelectorAll('.monaco-list-row').forEach(row => { if (row !== this) row.classList.remove('selected'); }); initMonacoEditor(this.getAttribute('data-filepath'), this.innerText.split('.').pop()); document.getElementById('watermark-section').style.display = 'none'; document.getElementById('file-icons').style.display = 'block'; document.getElementById('monacoeditorid').style.display = 'block';" class="monaco-list-row" role="treeitem" data-index="5" data-last-element="false" data-parity="odd"
                                                                     aria-setsize="9" aria-posinset="3" id="list_id_2_5" aria-selected="false" aria-level="1" draggable="false"
                                                                     style="position: relative; height: 22px; line-height: 22px;">
                                                                     <div class="monaco-tl-row">
@@ -293,9 +336,9 @@ function addfile() {
                                                                         </div>
                                                                     </div>
                                                                 </div>`;
+    }
 
-    const allInputs = document.querySelectorAll("#allfilesandfolders .input");
-    const lastInput = allInputs[allInputs.length - 1];
+    const lastInput = document.getElementsByClassName("input")[0];
     const labelDiv = lastInput.closest(".monaco-icon-label");
 
     lastInput.focus();
@@ -331,15 +374,21 @@ function addfile() {
         if (e.key === "Enter" && lastInput.value.trim() !== "") {
             confirmed = true; // Set the flag to true
             const inputValue = lastInput.value.trim();
+            if (selectedElement && selectedElement.hasAttribute('data-filepath')) {
+                path = selectedElement.getAttribute('data-filepath') + "/" + inputValue;
+            } else {
+                path = inputValue;
+            }
 
             lastInput.parentElement.parentElement.classList.remove("synthetic-focus");
             lastInput.parentElement.parentElement.style.backgroundColor = "transparent";
             lastInput.parentElement.parentElement.style.border = "none";
+            lastInput.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.setAttribute('data-filepath', path);
 
             // Replace input with span showing the entered text
             lastInput.parentElement.innerHTML = `<div class="monaco-icon-label-container" style="height: 22px;"><span class="monaco-icon-name-container"><a class="label-name"><span class="monaco-highlighted-label" style="height: 22px; display: block; padding-top: 2px;">${inputValue}</span></a></span></div>`;
 
-            saveFile(inputValue, "");
+            saveFile(path, "");
         }
     };
 
@@ -354,19 +403,107 @@ function addfile() {
     };
 }
 
-
 function addfolder() {
-    document.getElementById("allfilesandfolders").innerHTML += `<div class="monaco-list-row" onclick="this.classList.add('selected'); document.querySelectorAll('.monaco-list-row').forEach(row => { if (row !== this) row.classList.remove('selected'); }); toggleFolder(this);" role="treeitem" data-index="0" data-last-element="false" data-parity="even" aria-setsize="4" aria-posinset="1" id="list_id_2_0" aria-selected="false" aria-label="scripts" aria-level="1" aria-expanded="false" draggable="true" style="position: relative; height: 22px; line-height: 22px;">
-                                                                                                <div class="monaco-tl-row">
-                                                                                                   <div class="monaco-tl-indent" style="width: 0px;"></div>
-                                                                                                   <div class="monaco-tl-twistie collapsible codicon codicon-tree-item-expanded collapsed" style="padding-left: 8px;"></div>
-                                                                                                   <div class="monaco-tl-contents">
-                                                                                                      <div class="monaco-icon-label folder-icon codespaces-blank-name-dir-icon scripts-name-folder-icon explorer-item" aria-label="/workspaces/codespaces-blank/scripts" custom-hover="true" style="display: flex;">
-                                                                                                         <div class="monaco-icon-label-container"><span class="monaco-icon-name-container"><a class="label-name"><span class="monaco-highlighted-label">scripts</span></a></span></div>
-                                                                                                      </div>
-                                                                                                   </div>
-                                                                                                </div>
-                                                                                             </div>`;
+
+    const selectedElement = document.querySelector('.selected.monaco-list-folder');
+
+    if (selectedElement) {
+        // If an element with both classes exists, insert the new HTML after it
+        if (selectedElement.getAttribute('aria-expanded') === 'false') {
+            selectedElement.click();
+        }
+        selectedElement.insertAdjacentHTML('afterend', `
+            <div data-filepath="" class="monaco-list-row monaco-list-folder" role="treeitem" data-index="0" data-last-element="false" data-parity="even"
+                onclick="this.classList.add('selected'); document.querySelectorAll('.monaco-list-row').forEach(row => { if (row !== this) row.classList.remove('selected'); }); toggleFolder(this);"
+                aria-setsize="11" aria-posinset="1" id="list_id_1_0" aria-selected="false" aria-level="${Number(selectedElement.ariaLevel) + 1}" aria-expanded="false"
+                draggable="false" style="position: relative; height: 22px; line-height: 22px;">
+                <div class="monaco-tl-row">
+                    <div class="monaco-tl-indent" style="width: 0px;"></div>
+                    <div class="monaco-tl-twistie collapsible collapsed codicon codicon-tree-item-expanded" style="padding-left: ${(Number(selectedElement.ariaLevel) + 1) * 10}px;"></div>
+                    <div class="monaco-tl-contents">
+                        <div class="monaco-icon-label" style="display: none;">
+                            <div class="monaco-icon-label-container"><span class="monaco-icon-name-container"></span></div>
+                        </div>
+                        <div class="monaco-icon-label folder-icon codespaces-blank-name-dir-icon /-name-folder-icon explorer-item explorer-item-edited"
+                            aria-label="/workspaces/codespaces-blank/ " custom-hover="true">
+                            <div class="monaco-icon-label-container" style="display: none;">
+                                <span class="monaco-icon-name-container"><a class="label-name"></a></span>
+                            </div>
+                            <div class="monaco-inputbox idle synthetic-focus" style="background-color: var(--vscode-input-background); color: var(--vscode-input-foreground); border: 1px solid var(--vscode-input-border, transparent);">
+                                <div class="ibwrapper"><input class="input empty" autocorrect="off" autocapitalize="off" spellcheck="false" type="text" wrap="off" aria-label="Type file name. Press Enter to confirm or Escape to cancel." style="background-color: inherit; color: var(--vscode-input-foreground);" fdprocessedid="ip4fru">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        `);
+    } else {
+        // If no selected element, append to the main div directly
+        document.getElementById("allfilesandfolders").innerHTML += `<div data-filepath="" class="monaco-list-row monaco-list-folder" role="treeitem" data-index="0" data-last-element="false" data-parity="even"
+                                                                        onclick="this.classList.add('selected'); document.querySelectorAll('.monaco-list-row').forEach(row => { if (row !== this) row.classList.remove('selected'); }); toggleFolder(this);"
+                                                                        aria-setsize="11" aria-posinset="1" id="list_id_1_0" aria-selected="false" aria-level="1" aria-expanded="false"
+                                                                        draggable="false" style="height: 22px; line-height: 22px; position: relative;">
+                                                                        <div class="monaco-tl-row">
+                                                                            <div class="monaco-tl-indent" style="width: 0px;"></div>
+                                                                            <div class="monaco-tl-twistie collapsible collapsed codicon codicon-tree-item-expanded" style="padding-left: 8px;"></div>
+                                                                            <div class="monaco-tl-contents">
+                                                                                <div class="monaco-icon-label" style="display: none;">
+                                                                                    <div class="monaco-icon-label-container"><span class="monaco-icon-name-container"></span></div>
+                                                                                </div>
+                                                                                <div class="monaco-icon-label folder-icon codespaces-blank-name-dir-icon /-name-folder-icon explorer-item explorer-item-edited"
+                                                                                    custom-hover="true">
+                                                                                    <div class="monaco-icon-label-container" style="display: none;">
+                                                                                        <span class="monaco-icon-name-container"><a class="label-name"></a></span>
+                                                                                    </div>
+                                                                                    <div class="monaco-inputbox idle synthetic-focus" style="background-color: var(--vscode-input-background); color: var(--vscode-input-foreground); border: 1px solid var(--vscode-input-border, transparent);">
+                                                                                        <div class="ibwrapper"><input class="input empty" autocorrect="off" autocapitalize="off" spellcheck="false" type="text" wrap="off" aria-label="Type file name. Press Enter to confirm or Escape to cancel." style="background-color: inherit; color: var(--vscode-input-foreground);" fdprocessedid="ip4fru">
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>`;
+    }
+
+    const lastInput = document.getElementsByClassName("input")[0];
+
+    lastInput.focus();
+
+    let confirmed = false; // Flag to check if Enter was pressed
+
+    // Handle Enter key to replace input with span
+    lastInput.onkeydown = function (e) {
+        if (e.key === "Enter" && lastInput.value.trim() !== "") {
+            confirmed = true; // Set the flag to true
+            const inputValue = lastInput.value.trim();
+            if (selectedElement && selectedElement.hasAttribute('data-filepath')) {
+                path = selectedElement.getAttribute('data-filepath') + "/" + inputValue;
+            } else {
+                path = inputValue;
+            }
+
+            lastInput.parentElement.parentElement.classList.remove("synthetic-focus");
+            lastInput.parentElement.parentElement.style.backgroundColor = "transparent";
+            lastInput.parentElement.parentElement.style.border = "none";
+            lastInput.parentElement.parentElement.ariaDescription = inputValue;
+            lastInput.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.setAttribute('data-filepath', path);
+
+            // Replace input with span showing the entered text
+            lastInput.parentElement.innerHTML = `<div class="monaco-icon-label-container" style="height: 22px;"><span class="monaco-icon-name-container"><a class="label-name"><span class="monaco-highlighted-label" style="height: 22px; display: block; padding-top: 2px;">${inputValue}</span></a></span></div>`;
+
+            saveFile(path + "/", "");
+        }
+    };
+
+    // Handle blur event to remove the div if Enter was not pressed
+    lastInput.onblur = function () {
+        if (!confirmed) { // Only remove if Enter wasn't pressed
+            const parentDiv = lastInput.closest(".monaco-list-row");
+            if (parentDiv) {
+                parentDiv.remove();
+            }
+        }
+    };
 }
 
 function switchtab(tab) {
@@ -387,7 +524,8 @@ async function fetchAndCreateDirectoryStructure(url) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const jsonData = await response.json();
-        const mainDiv = document.getElementById('allfilesandfolders');
+        var mainDiv = document.getElementById('allfilesandfolders');
+
         if (mainDiv) {
             createDirectoryStructure(jsonData, mainDiv, 1); // Start at level 1
         } else {
@@ -396,14 +534,14 @@ async function fetchAndCreateDirectoryStructure(url) {
     } catch (error) {
         const mainDiv = document.getElementById('allfilesandfolders');
         if (mainDiv) {
-            mainDiv.innerHTML = `<p>Error fetching or parsing JSON: ${error.message}</p>`;
+            mainDiv.innerHTML = `The current project is empty. Click the "Add File" button to create a new file.`;
         } else {
             console.error("Could not find a div with the id 'output'. Please add a div with this ID to your HTML.", error);
         }
     }
 }
 
-function createDirectoryStructure(data, parentDiv, level) {
+function createDirectoryStructure(data, parentDiv, level, path="") {
     for (const [key, value] of Object.entries(data)) {
         const div = document.createElement('div');
         lang = key.split('.').pop();
@@ -417,8 +555,10 @@ function createDirectoryStructure(data, parentDiv, level) {
         } else if (lang === "cs") {
             lang = "csharp";
         }
-        
-        div.innerHTML = (typeof value === 'string' ? `<div class="monaco-list-row" onclick="this.classList.add('selected'); document.querySelectorAll('.monaco-list-row').forEach(row => { if (row !== this) row.classList.remove('selected'); }); initMonacoEditor(this.innerText, this.innerText.split('.').pop()); document.getElementById('watermark-section').style.display = 'none'; document.getElementById('file-icons').style.display = 'block'; document.getElementById('monacoeditorid').style.display = 'block';" role="treeitem" data-index="4" data-last-element="false" data-parity="even" aria-setsize="4" aria-posinset="2" id="list_id_2_4" aria-selected="false" aria-label="${key}" aria-level="${level}" draggable="true" style="position: relative; height: 22px; line-height: 22px;">
+
+        startdisplay = level > 1 ? "none" : "block";
+
+        div.innerHTML = (typeof value === 'string' ? `<div class="monaco-list-row" data-filepath="${path + key}" onclick="this.classList.add('selected'); document.querySelectorAll('.monaco-list-row').forEach(row => { if (row !== this) row.classList.remove('selected'); }); initMonacoEditor('${path + key}', this.innerText.split('.').pop()); document.getElementById('watermark-section').style.display = 'none'; document.getElementById('file-icons').style.display = 'block'; document.getElementById('monacoeditorid').style.display = 'block';" role="treeitem" data-index="4" data-last-element="false" data-parity="even" aria-setsize="4" aria-posinset="2" id="list_id_2_4" aria-selected="false" aria-label="${key}" aria-level="${level}" draggable="true" style="position: relative; height: 22px; line-height: 22px; display: ${startdisplay};">
                                                                                                     <div class="monaco-tl-row">
                                                                                                         <div class="monaco-tl-indent" style="width: 0px;"></div>
                                                                                                         <div class="monaco-tl-twistie" style="padding-left: 8px;"></div>
@@ -428,7 +568,7 @@ function createDirectoryStructure(data, parentDiv, level) {
                                                                                                             </div>
                                                                                                         </div>
                                                                                                     </div>
-                                                                                                    </div>` : `<div class="monaco-list-row" onclick="this.classList.add('selected'); document.querySelectorAll('.monaco-list-row').forEach(row => { if (row !== this) row.classList.remove('selected'); }); toggleFolder(this);" role="treeitem" data-index="0" data-last-element="false" data-parity="even" aria-setsize="4" aria-posinset="1" id="list_id_2_0" aria-selected="false" aria-label="scripts" aria-level="1" aria-expanded="false" draggable="true" style="position: relative; height: 22px; line-height: 22px;">
+                                                                                                    </div>` : `<div data-filepath="${path + key}" class="monaco-list-row monaco-list-folder" onclick="this.classList.add('selected'); document.querySelectorAll('.monaco-list-row').forEach(row => { if (row !== this) row.classList.remove('selected'); }); toggleFolder(this);" role="treeitem" data-index="0" data-last-element="false" data-parity="even" aria-setsize="4" aria-posinset="1" id="list_id_2_0" aria-selected="false" aria-label="scripts" aria-level="${level}" aria-expanded="false" draggable="true" style="position: relative; height: 22px; line-height: 22px; display: ${startdisplay};">
                                                                                                    <div class="monaco-tl-row">
                                                                                                       <div class="monaco-tl-indent" style="width: 0px;"></div>
                                                                                                       <div class="monaco-tl-twistie collapsible codicon codicon-tree-item-expanded collapsed" style="padding-left: 8px;"></div>
@@ -439,20 +579,59 @@ function createDirectoryStructure(data, parentDiv, level) {
                                                                                                       </div>
                                                                                                    </div>
                                                                                                 </div>`);
-                                                                                            
+
         if (level > 1) {
-            div.getElementsByClassName("monaco-list-row")[0].style.display = 'none';
-            div.getElementsByClassName("monaco-tl-twistie")[0].style.paddingLeft = `${level * 10}px`;
-            div.getElementsByClassName("monaco-tl-indent")[0].innerHTML = `<div class="monaco-tl-indent" style="width: 8px;"></div>`;
+            div.querySelector(".monaco-tl-twistie").style.paddingLeft = `${level * 10}px`;
+            div.querySelector(".monaco-tl-indent").style.width = `${level * 10}px`;
         }
 
-        parentDiv.appendChild(div);
+        parentDiv.innerHTML += div.innerHTML
 
         if (typeof value === 'object') {
-            createDirectoryStructure(value, parentDiv, level + 1);
+            level++
+            createDirectoryStructure(value, parentDiv, level, path + key + "/");
         }
     }
 }
+
+async function renamefile() {
+    
+}
+
+async function deletefile() {
+    hideContextMenu();
+    if (!currentProject) {
+        return
+    }
+    const filePath = document.getElementsByClassName("selected")[0].getAttribute("data-filepath");
+    document.getElementsByClassName("selected")[0].remove();
+    try {
+        const response = await fetch(`https://quizizzvscodehost.blaub002-302.workers.dev/delete/${currentProject}/${filePath}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            console.log(`File "${filePath}" deleted successfully.`);
+        } else {
+            const errorMessage = await response.text();
+            console.error(`Failed to delete file: ${errorMessage}`);
+        }
+    } catch (error) {
+        console.error(`Error deleting file: ${error.message}`);
+    }
+}
+
+const deleteclick = async (event) => {
+    if (event.key === "Delete") {
+        event.preventDefault();
+        deletefile();
+    }
+};
+
+window.addEventListener("keydown", deleteclick);
 
 // Initialize the editor
 window.addEventListener("DOMContentLoaded", () => {

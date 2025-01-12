@@ -1,5 +1,15 @@
 // Function to show the context menu
 function showContextMenu(event) {
+    document.querySelectorAll('.monaco-list-row').forEach(row => {
+        row.classList.remove('selected');
+    });
+    const element = document.elementFromPoint(event.pageX, event.pageY).closest('.monaco-list-row');
+    if (element && element.classList.contains('monaco-list-row')) {
+        element.classList.add('selected');
+    } else {
+        
+    }
+
     event.preventDefault();
     
     // Check if a context menu already exists and remove it
@@ -17,7 +27,86 @@ function showContextMenu(event) {
     contextMenu.style.display = 'block';
 
     // Set the inner HTML (large content omitted for brevity)
-    contextMenu.innerHTML = `<div class="bottom context-view fixed left monaco-component monaco-menu-container"style=top:${event.pageY}px;left:${event.pageX}px;z-index:2575;position:fixed;width:initial role=presentation><style media=screen>.monaco-menu{font-size:13px;border-radius:5px;min-width:160px}.codicon-menu-selection:before{content:'\eab2'}.codicon-menu-submenu:before{content:'\eab6'}.monaco-menu .monaco-action-bar{text-align:right;overflow:hidden;white-space:nowrap}.monaco-menu .monaco-action-bar .actions-container{display:flex;margin:0 auto;padding:0;width:100%;justify-content:flex-end}.monaco-menu .monaco-action-bar.vertical .actions-container{display:inline-block}.monaco-menu .monaco-action-bar.reverse .actions-container{flex-direction:row-reverse}.monaco-menu .monaco-action-bar .action-item{cursor:pointer;display:inline-block;transition:transform 50ms ease;position:relative}.monaco-menu .monaco-action-bar .action-item.disabled{cursor:default}.monaco-menu .monaco-action-bar .action-item .codicon,.monaco-menu .monaco-action-bar .action-item .icon{display:inline-block}.monaco-menu .monaco-action-bar .action-item .codicon{display:flex;align-items:center}.monaco-menu .monaco-action-bar .action-label{font-size:11px;margin-right:4px}.monaco-menu .monaco-action-bar .action-item.disabled .action-label,.monaco-menu .monaco-action-bar .action-item.disabled .action-label:hover{color:var(--vscode-disabledForeground)}.monaco-menu .monaco-action-bar.vertical{text-align:left}.monaco-menu .monaco-action-bar.vertical .action-item{display:block}.monaco-menu .monaco-action-bar.vertical .action-label.separator{display:block;border-bottom:1px solid var(--vscode-menu-separatorBackground);padding-top:1px;padding:30px}.monaco-menu .secondary-actions .monaco-action-bar .action-label{margin-left:6px}.monaco-menu .monaco-action-bar .action-item.select-container{overflow:hidden;flex:1;max-width:170px;min-width:60px;display:flex;align-items:center;justify-content:center;margin-right:10px}.monaco-menu .monaco-action-bar.vertical{margin-left:0;overflow:visible}.monaco-menu .monaco-action-bar.vertical .actions-container{display:block}.monaco-menu .monaco-action-bar.vertical .action-item{padding:0;transform:none;display:flex}.monaco-menu .monaco-action-bar.vertical .action-item.active{transform:none}.monaco-menu .monaco-action-bar.vertical .action-menu-item{flex:1 1 auto;display:flex;height:2em;align-items:center;position:relative;margin:0 4px;border-radius:4px}.monaco-menu .monaco-action-bar.vertical .action-menu-item:focus .keybinding,.monaco-menu .monaco-action-bar.vertical .action-menu-item:hover .keybinding{opacity:unset}.monaco-menu .monaco-action-bar.vertical .action-label{flex:1 1 auto;text-decoration:none;padding:0 1em;background:0 0;font-size:12px;line-height:1}.monaco-menu .monaco-action-bar.vertical .keybinding,.monaco-menu .monaco-action-bar.vertical .submenu-indicator{display:inline-block;flex:2 1 auto;padding:0 1em;text-align:right;font-size:12px;line-height:1}.monaco-menu .monaco-action-bar.vertical .submenu-indicator{height:100%}.monaco-menu .monaco-action-bar.vertical .submenu-indicator.codicon{font-size:16px!important;display:flex;align-items:center}.monaco-menu .monaco-action-bar.vertical .submenu-indicator.codicon::before{margin-left:auto;margin-right:-20px}.monaco-menu .monaco-action-bar.vertical .action-item.disabled .keybinding,.monaco-menu .monaco-action-bar.vertical .action-item.disabled .submenu-indicator{opacity:.4}.monaco-menu .monaco-action-bar.vertical .action-label:not(.separator){display:inline-block;box-sizing:border-box;margin:0}.monaco-menu .monaco-action-bar.vertical .action-item{position:static;overflow:visible}.monaco-menu .monaco-action-bar.vertical .action-item .monaco-submenu{position:absolute}.monaco-menu .monaco-action-bar.vertical .action-label.separator{width:100%;height:0!important;opacity:1}.monaco-menu .monaco-action-bar.vertical .action-label.separator.text{padding:.7em 1em .1em 1em;font-weight:700;opacity:1}.monaco-menu .monaco-action-bar.vertical .action-label:hover{color:inherit}.monaco-menu .monaco-action-bar.vertical .menu-item-check{position:absolute;visibility:hidden;width:1em;height:100%}.monaco-menu .monaco-action-bar.vertical .action-menu-item.checked .menu-item-check{visibility:visible;display:flex;align-items:center;justify-content:center}.context-view.monaco-menu-container{outline:0;border:none;animation:fadeIn 83ms linear;-webkit-app-region:no-drag}.context-view.monaco-menu-container .monaco-action-bar.vertical :focus,.context-view.monaco-menu-container .monaco-action-bar.vertical:focus,.context-view.monaco-menu-container :focus{outline:0}.hc-black .context-view.monaco-menu-container,.hc-light .context-view.monaco-menu-container,:host-context(.hc-black) .context-view.monaco-menu-container,:host-context(.hc-light) .context-view.monaco-menu-container{box-shadow:none}.hc-black .monaco-menu .monaco-action-bar.vertical .action-item.focused,.hc-light .monaco-menu .monaco-action-bar.vertical .action-item.focused,:host-context(.hc-black) .monaco-menu .monaco-action-bar.vertical .action-item.focused,:host-context(.hc-light) .monaco-menu .monaco-action-bar.vertical .action-item.focused{background:0 0}.monaco-menu .monaco-action-bar.vertical{padding:4px 0}.monaco-menu .monaco-action-bar.vertical .action-menu-item{height:2em}.monaco-menu .monaco-action-bar.vertical .action-label:not(.separator),.monaco-menu .monaco-action-bar.vertical .keybinding{font-size:inherit;padding:0 2em;max-height:100%}.monaco-menu .monaco-action-bar.vertical .menu-item-check{font-size:inherit;width:2em}.monaco-menu .monaco-action-bar.vertical .action-label.separator{font-size:inherit;margin:5px 0!important;padding:0;border-radius:0}.linux .monaco-menu .monaco-action-bar.vertical .action-label.separator,:host-context(.linux) .monaco-menu .monaco-action-bar.vertical .action-label.separator{margin-left:0;margin-right:0}.monaco-menu .monaco-action-bar.vertical .submenu-indicator{font-size:60%;padding:0 1.8em}.linux .monaco-menu .monaco-action-bar.vertical .submenu-indicator,:host-context(.linux) .monaco-menu .monaco-action-bar.vertical .submenu-indicator{height:100%;mask-size:10px 10px;-webkit-mask-size:10px 10px}.monaco-menu .action-item{cursor:default}.monaco-scrollable-element>.scrollbar>.scra{cursor:pointer;font-size:11px!important}.monaco-scrollable-element>.visible{opacity:1;background:rgba(0,0,0,0);transition:opacity .1s linear}.monaco-scrollable-element>.invisible{opacity:0;pointer-events:none}.monaco-scrollable-element>.invisible.fade{transition:opacity .8s linear}.monaco-scrollable-element>.shadow{position:absolute;display:none}.monaco-scrollable-element>.shadow.top{display:block;top:0;left:3px;height:3px;width:100%}.monaco-scrollable-element>.shadow.left{display:block;top:3px;left:0;height:100%;width:3px}.monaco-scrollable-element>.shadow.top-left-corner{display:block;top:0;left:0;height:3px;width:3px}.monaco-scrollable-element>.shadow.top{box-shadow:var(--vscode-scrollbar-shadow) 0 6px 6px -6px inset}.monaco-scrollable-element>.shadow.left{box-shadow:var(--vscode-scrollbar-shadow) 6px 0 6px -6px inset}.monaco-scrollable-element>.shadow.top.left{box-shadow:var(--vscode-scrollbar-shadow) 6px 6px 6px -6px inset}.monaco-scrollable-element>.scrollbar>.slider{background:var(--vscode-scrollbarSlider-background)}.monaco-scrollable-element>.scrollbar>.slider:hover{background:var(--vscode-scrollbarSlider-hoverBackground)}.monaco-scrollable-element>.scrollbar>.slider.active{background:var(--vscode-scrollbarSlider-activeBackground)}</style><div class=monaco-scrollable-element style="overflow:hidden;outline:1px solid var(--vscode-menu-border);border-radius:5px;color:var(--vscode-menu-foreground);background-color:var(--vscode-menu-background);box-shadow:0 2px 8px var(--vscode-widget-shadow)"role=presentation><div class=monaco-menu style=overflow:hidden;max-height:834px role=presentation><div class="vertical monaco-action-bar"><ul class=actions-container role=menu tabindex=0><li class=action-item role=presentation tabindex=0><a aria-checked=""class=action-menu-item role=menuitem style=color:var(--vscode-menu-foreground) aria-posinset=1 aria-setsize=8 tabindex=0><span class="codicon codicon-menu-selection menu-item-check"role=none style=color:var(--vscode-menu-foreground)></span><span class=action-label aria-label="Go to Symbol...">Go to Symbol...</span><span class=keybinding>Ctrl+Shift+O</span></a><li class="action-item disabled"role=presentation><a aria-checked=false class="action-label codicon disabled separator"role=checkbox style=border-bottom-color:var(--vscode-menu-separatorBackground) aria-disabled=true aria-label=""></a><li class=action-item role=presentation tabindex=-1><a aria-checked=""class=action-menu-item role=menuitem style=color:var(--vscode-menu-foreground) aria-posinset=2 aria-setsize=8 tabindex=0><span class="codicon codicon-menu-selection menu-item-check"role=none style=color:var(--vscode-menu-foreground)></span><span class=action-label aria-label="Rename Symbol">Rename Symbol</span><span class=keybinding>F2</span></a><li class=action-item role=presentation><a aria-checked=""class=action-menu-item role=menuitem style=color:var(--vscode-menu-foreground) aria-posinset=3 aria-setsize=8 tabindex=0><span class="codicon codicon-menu-selection menu-item-check"role=none style=color:var(--vscode-menu-foreground)></span><span class=action-label aria-label="Change All Occurrences">Change All Occurrences</span><span class=keybinding>Ctrl+F2</span></a><li class=action-item role=presentation><a aria-checked=""class=action-menu-item role=menuitem style=color:var(--vscode-menu-foreground) aria-posinset=4 aria-setsize=8 tabindex=0><span class="codicon codicon-menu-selection menu-item-check"role=none style=color:var(--vscode-menu-foreground)></span><span class=action-label aria-label="Format Document">Format Document</span><span class=keybinding>Shift+Alt+F</span></a><li class="action-item disabled"role=presentation><a aria-checked=false class="action-label codicon disabled separator"role=checkbox style=border-bottom-color:var(--vscode-menu-separatorBackground) aria-disabled=true aria-label=""></a><li class=action-item role=presentation><a aria-checked=""class=action-menu-item role=menuitem style=color:var(--vscode-menu-foreground) aria-posinset=5 aria-setsize=8 tabindex=0><span class="codicon codicon-menu-selection menu-item-check"role=none style=color:var(--vscode-menu-foreground)></span><span class=action-label aria-label=Cut>Cut</span></a><li class=action-item role=presentation><a aria-checked=""class=action-menu-item role=menuitem style=color:var(--vscode-menu-foreground) aria-posinset=6 aria-setsize=8 tabindex=0><span class="codicon codicon-menu-selection menu-item-check"role=none style=color:var(--vscode-menu-foreground)></span><span class=action-label aria-label=Copy>Copy</span></a><li class=action-item role=presentation><a aria-checked=""class=action-menu-item role=menuitem style=color:var(--vscode-menu-foreground) aria-posinset=7 aria-setsize=8 tabindex=0><span class="codicon codicon-menu-selection menu-item-check"role=none style=color:var(--vscode-menu-foreground)></span><span class=action-label aria-label=Paste>Paste</span></a><li class="action-item disabled"role=presentation><a aria-checked=false class="action-label codicon disabled separator"role=checkbox style=border-bottom-color:var(--vscode-menu-separatorBackground) aria-disabled=true aria-label=""></a><li class=action-item role=presentation><a aria-checked=""class=action-menu-item role=menuitem style=color:var(--vscode-menu-foreground) aria-posinset=8 aria-setsize=8 tabindex=0><span class="codicon codicon-menu-selection menu-item-check"role=none style=color:var(--vscode-menu-foreground)></span><span class=action-label aria-label="Command Palette">Command Palette</span><span class=keybinding>F1</span></a></ul></div></div><div class="invisible scrollbar horizontal"style=position:absolute;width:284px;height:0;left:0;bottom:0 role=presentation aria-hidden=true><div class=slider style=position:absolute;top:0;left:0;height:10px;transform:translate3d(0,0,0);contain:strict;width:284px></div></div><div class="invisible scrollbar vertical"style=position:absolute;width:7px;height:249px;right:0;top:0 role=presentation aria-hidden=true><div class=slider style=position:absolute;top:0;left:0;width:7px;transform:translate3d(0,0,0);contain:strict;height:249px></div></div><div class=shadow></div><div class=shadow></div><div class=shadow></div></div></div>`;
+    contextMenu.innerHTML = `<div class="bottom context-view fixed left monaco-component monaco-menu-container"
+    style=top:${event.pageY}px;left:${event.pageX}px;z-index:2575;position:fixed;width:initial role=presentation>
+    <div class=monaco-scrollable-element
+        style="overflow:hidden;outline:1px solid var(--vscode-menu-border);border-radius:5px;color:var(--vscode-menu-foreground);background-color:#2f363d;box-shadow:0 2px 8px var(--vscode-widget-shadow)"
+        role=presentation>
+        <div class=monaco-menu style=overflow:hidden;max-height:834px role=presentation>
+            <div class="vertical monaco-action-bar">
+                <ul class=actions-container role=menu>
+                    <li class=action-item role=presentation><a class=action-menu-item
+                            onclick="addfile()"
+                            style=color:var(--vscode-menu-foreground)><span class="codicon codicon-menu-selection menu-item-check"role=none style=color:var(--vscode-menu-foreground)></span><span class=action-label aria-label="Go to Symbol...">New File...</span><span class=keybinding></span></a>
+                    </li>
+                    <li class=action-item role=presentation><a class=action-menu-item
+                            onclick="addfolder()"
+                            style=color:var(--vscode-menu-foreground)><span class="codicon codicon-menu-selection menu-item-check"role=none style=color:var(--vscode-menu-foreground)></span><span class=action-label aria-label="Go to Symbol...">New Folder...</span><span class=keybinding></span></a>
+                    </li>
+                    <li class="action-item disabled" role=presentation><a
+                            class="action-label codicon disabled separator" role=checkbox
+                            style=border-bottom-color:var(--vscode-menu-separatorBackground) aria-disabled=true></a>
+                    </li>
+                    <li class=action-item role=presentation tabindex=-1><a class=action-menu-item
+                            onclick=""
+                            style=color:var(--vscode-menu-foreground)><span class="codicon codicon-menu-selection menu-item-check"role=none style=color:var(--vscode-menu-foreground)></span><span class=action-label aria-label="Rename Symbol">Cut</span><span class=keybinding>Ctrl+X</span></a>
+                    </li>
+                    <li class=action-item role=presentation><a class=action-menu-item
+                            onclick=""
+                            style=color:var(--vscode-menu-foreground)><span class="codicon codicon-menu-selection menu-item-check"role=none style=color:var(--vscode-menu-foreground)></span><span class=action-label aria-label="Change All Occurrences">Copy</span><span class=keybinding>Ctrl+C</span></a>
+                    </li>
+                    <li class=action-item role=presentation><a class=action-menu-item
+                            onclick=""
+                            style=color:var(--vscode-menu-foreground)><span class="codicon codicon-menu-selection menu-item-check"role=none style=color:var(--vscode-menu-foreground)></span><span class=action-label aria-label="Format Document">Paste</span><span class=keybinding>Ctrl+V</span></a>
+                    </li>
+                    <li class="action-item disabled" role=presentation><a
+                            class="action-label codicon disabled separator" role=checkbox
+                            style=border-bottom-color:var(--vscode-menu-separatorBackground) aria-disabled=true></a>
+                    </li>
+                    <li class=action-item role=presentation><a class=action-menu-item
+                            onclick=""
+                            style=color:var(--vscode-menu-foreground)><span class="codicon codicon-menu-selection menu-item-check"role=none style=color:var(--vscode-menu-foreground)></span><span class=action-label aria-label=Cut>Download</span></a>
+                    </li>
+                    <li class="action-item disabled" role=presentation><a
+                            class="action-label codicon disabled separator" role=checkbox
+                            style=border-bottom-color:var(--vscode-menu-separatorBackground) aria-disabled=true></a>
+                    </li>
+                    <li class=action-item role=presentation><a class=action-menu-item
+                            onclick="navigator.clipboard.writeText('workspaces/project/' + currentProject + '/' + document.getElementsByClassName('selected')[0].getAttribute('data-filepath'))"
+                            style=color:var(--vscode-menu-foreground)><span class="codicon codicon-menu-selection menu-item-check"role=none style=color:var(--vscode-menu-foreground)></span><span class=action-label aria-label="Command Palette">Copy Path</span><span class=keybinding>Shift+Alt+C</span></a>
+                    </li>
+                    <li class="action-item disabled" role=presentation><a
+                            class="action-label codicon disabled separator" role=checkbox
+                            style=border-bottom-color:var(--vscode-menu-separatorBackground) aria-disabled=true></a>
+                    </li>
+                    <li class=action-item role=presentation><a class=action-menu-item
+                            onclick="renamefile()"
+                            style=color:var(--vscode-menu-foreground)><span class="codicon codicon-menu-selection menu-item-check"role=none style=color:var(--vscode-menu-foreground)></span><span class=action-label aria-label="Command Palette">Rename...</span><span class=keybinding>F2</span></a>
+                    </li>
+                    <li class=action-item role=presentation><a class=action-menu-item
+                            onclick="deletefile()"
+                            style=color:var(--vscode-menu-foreground)><span class="codicon codicon-menu-selection menu-item-check"role=none style=color:var(--vscode-menu-foreground)></span><span class=action-label aria-label="Command Palette">Delete Permanantly</span><span class=keybinding>Delete</span></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="invisible scrollbar horizontal" style=position:absolute;width:284px;height:0;left:0;bottom:0
+            role=presentation aria-hidden=true>
+            <div class=slider
+                style=position:absolute;top:0;left:0;height:10px;transform:translate3d(0,0,0);contain:strict;width:284px>
+            </div>
+        </div>
+        <div class="invisible scrollbar vertical" style=position:absolute;width:7px;height:249px;right:0;top:0
+            role=presentation aria-hidden=true>
+            <div class=slider
+                style=position:absolute;top:0;left:0;width:7px;transform:translate3d(0,0,0);contain:strict;height:249px>
+            </div>
+        </div>
+        <div class=shadow></div>
+        <div class=shadow></div>
+        <div class=shadow></div>
+    </div>
+</div>`;
 }
 
 // Function to hide the context menu
