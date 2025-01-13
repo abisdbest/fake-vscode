@@ -9,6 +9,12 @@ async function initMonacoEditor(filename, lang) {
     try {
         if (lang === "js") {
             lang = "javascript";
+        } else if (lang === "cs") {
+            lang = "csharp";
+        } else if (lang === "py") {
+            lang = "python";
+        } else if (lang === "sh") {
+            lang = "shellscript";
         }
 
         // Update existing tabs to remove 'active' and 'selected' classes
