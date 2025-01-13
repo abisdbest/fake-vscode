@@ -1,9 +1,16 @@
-let isEditorReady = false;
 let currentProject = "exampleproject";
-let editor;
-let currentFile;
-let fileContents = {}; // Cache file contents by filename
 let isEmmetRegistered = false; // Add a global flag to track Emmet registration
+
+require.config({
+    paths: {
+        'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.49.0/min/vs'
+    }
+});
+
+let isMonacoInitialized = false;
+let editor = null;
+let currentFile = '';
+let fileContents = {};
 
 async function initMonacoEditor(filename, lang) {
     try {
@@ -35,7 +42,7 @@ async function initMonacoEditor(filename, lang) {
             tab.setAttribute("aria-selected", "false");
         });
 
-        // Add a new tab and set it as active
+        // Add new tab
         tabsContainer.innerHTML += `
         <div draggable="true" role="tab" class="tab tab-actions-right sizing-fit has-icon tab-border-bottom active selected tab-border-top" 
             aria-label="${filename}" aria-description="" custom-hover="true" data-resource-name="${filename}" 
@@ -66,10 +73,6 @@ async function initMonacoEditor(filename, lang) {
         </div>`;
 
         let content;
-        document.getElementById("lowerlangicontab").className = `monaco-icon-label file-icon codespaces-blank-name-dir-icon index.${lang}-name-file-icon name-file-icon ${lang}-ext-file-icon ext-file-icon ${lang}-lang-file-icon tab-label tab-label-has-badge`;
-        document.getElementById("otherlanglower").innerText = lang;
-        document.getElementById("firstlanglower").innerText = filename;
-
         try {
             const response = await fetch(`https://quizizzvscodehost.blaub002-302.workers.dev/get/${currentProject}/${encodeURIComponent(filename)}`);
             if (!response.ok) {
@@ -94,57 +97,126 @@ async function initMonacoEditor(filename, lang) {
 
         const themeResponse = await fetch('https://quizizzvscode.pages.dev/github-dark.json');
         if (!themeResponse.ok) {
-            throw new Error(`Failed to fetch JSON: ${themeResponse.statusText}`);
+            throw new Error(`Failed to fetch theme JSON: ${themeResponse.statusText}`);
         }
         const theme = await themeResponse.json();
 
-        require.config({
-            paths: {
-                'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.49.0/min/vs'
-            }
-        });
-
-        require(['vs/editor/editor.main'], function () {
-            if (!isEmmetRegistered) {
-                console.log("Registering Emmet...");
-                emmetMonaco.emmetHTML(monaco);
-                isEmmetRegistered = true;
-            }
-
-            monaco.editor.defineTheme('github-dark', theme);
-            monaco.editor.setTheme('github-dark');
-            document.getElementById('monacoeditorid').innerHTML = "";
-
-            if (editor) {
-                editor.dispose();
-            }
-
-            editor = monaco.editor.create(document.getElementById('monacoeditorid'), {
-                value: content,
-                language: lang,
-                theme: 'github-dark',
-                minimap: {
-                    enabled: true
-                }
+        if (!isMonacoInitialized) {
+            require(['vs/editor/editor.main'], function () {
+                initializeEditor(filename, lang, content, theme);
+                isMonacoInitialized = true;
             });
+        } else {
+            initializeEditor(filename, lang, content, theme);
+        }
 
-            isEditorReady = true;
-
-            const saveHandler = async (event) => {
-                if (event.ctrlKey && event.key === "s") {
-                    event.preventDefault();
-                    const currentValue = editor.getValue();
-                    updateCachedContent(currentFile, currentValue);
-                    await saveFile(currentFile, currentValue);
-                    console.log(`File "${currentFile}" saved successfully!`);
-                }
-            };
-
-            window.removeEventListener("keydown", saveHandler);
-            window.addEventListener("keydown", saveHandler);
-        });
     } catch (error) {
         console.error(`Error initializing editor: ${error.message}`);
+    }
+}
+
+function initializeEditor(filename, lang, content, theme) {
+    // Set Monaco theme
+    monaco.editor.defineTheme('github-dark', theme);
+    monaco.editor.setTheme('github-dark');
+
+    // Dispose of any existing editor instance
+    if (editor) {
+        editor.dispose();
+    }
+
+    editor = monaco.editor.create(document.getElementById('monacoeditorid'), {
+        value: content,
+        language: lang,
+        theme: 'github-dark',
+        minimap: {
+            enabled: true
+        }
+    });
+
+    // Enable IntelliSense for specific languages
+    setupLanguageFeatures(lang);
+
+    const saveHandler = async (event) => {
+        if (event.ctrlKey && event.key === "s") {
+            event.preventDefault();
+            const currentValue = editor.getValue();
+            updateCachedContent(currentFile, currentValue);
+            await saveFile(currentFile, currentValue);
+            console.log(`File "${currentFile}" saved successfully!`);
+        }
+    };
+
+    window.removeEventListener("keydown", saveHandler);
+    window.addEventListener("keydown", saveHandler);
+}
+
+function setupLanguageFeatures(lang) {
+    if (lang === 'javascript') {
+        monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+            target: monaco.languages.typescript.ScriptTarget.ES6,
+            allowNonTsExtensions: true,
+            moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+            module: monaco.languages.typescript.ModuleKind.CommonJS,
+            allowJs: true,
+            checkJs: true
+        });
+
+        monaco.languages.typescript.javascriptDefaults.addExtraLib(`
+            declare var console: {
+                log(msg: any): void;
+            };
+        `, 'ts:filename/console.d.ts');
+
+        monaco.languages.typescript.javascriptDefaults.addExtraLib(`
+            declare var window: Window & typeof globalThis;
+            declare var document: Document;
+        `, 'ts:filename/dom.d.ts');
+    } else if (lang === 'html') {
+        monaco.languages.html.htmlDefaults.setOptions({
+            format: {
+                wrapLineLength: 120,
+                unformatted: 'b,code,em,i,span,strong,sub,sup,u'
+            }
+        });
+    } else if (lang === 'css') {
+        monaco.languages.css.cssDefaults.setOptions({
+            validate: true,
+            lint: {
+                compatibleVendorPrefixes: 'ignore',
+                vendorPrefix: 'warning',
+                duplicateProperties: 'warning',
+                emptyRules: 'warning',
+                importStatement: 'ignore',
+                boxModel: 'ignore',
+                universalSelector: 'ignore',
+                zeroUnits: 'ignore'
+            }
+        });
+    } else if (lang === 'python') {
+        require(['vs/basic-languages/python/python'], function (py) {
+            monaco.languages.register({ id: 'python' });
+            monaco.languages.setMonarchTokensProvider('python', py.language);
+            monaco.languages.setLanguageConfiguration('python', py.conf);
+        });
+    } else if (lang === 'csharp') {
+        require(['vs/basic-languages/csharp/csharp'], function (cs) {
+            monaco.languages.register({ id: 'csharp' });
+            monaco.languages.setMonarchTokensProvider('csharp', cs.language);
+            monaco.languages.setLanguageConfiguration('csharp', cs.conf);
+        });
+    } else if (lang === 'shellscript') {
+        require(['vs/basic-languages/shell/shell'], function (sh) {
+            monaco.languages.register({ id: 'shellscript' });
+            monaco.languages.setMonarchTokensProvider('shellscript', sh.language);
+            monaco.languages.setLanguageConfiguration('shellscript', sh.conf);
+        });
+    } else if (lang === 'cpp') {
+        require(['vs/basic-languages/cpp/cpp'], function (cpp) {
+            monaco.languages.register({ id: 'cpp' });
+            monaco.languages.setMonarchTokensProvider('cpp', cpp.language);
+            monaco.languages.setLanguageConfiguration('cpp', cpp.conf);
+        });
     }
 }
 
@@ -194,7 +266,10 @@ function activateTab(tabElement, filename) {
 
     // Update the editor language based on file extension
     const lang = filename.split('.').pop();
-    const monacoLang = lang === 'js' ? 'javascript' : lang;
+    const monacoLang = lang === 'js' ? 'javascript' :
+        lang === 'py' ? 'python' :
+            lang === 'sh' ? 'shellscript' :
+                lang === 'cs' ? 'csharp' : lang;
     monaco.editor.setModelLanguage(editor.getModel(), monacoLang);
 
     currentFile = filename;
@@ -270,9 +345,9 @@ function toggleFolder(row) {
             else if (toggleMode == "expand" && itemLevel != folderLevel + 1) {
                 return; // Skip rows with higher level
             }
-            // if (item.classList.contains('monaco-list-folder') && toggleMode === 'collapse' && item.getAttribute('aria-expanded') === 'true') {
-            //     toggleFolder(item); // Recursively toggle nested folders
-            // }
+            if (item.classList.contains('monaco-list-folder') && toggleMode === 'collapse' && item.getAttribute('aria-expanded') === 'true') {
+                toggleFolder(item); // Recursively toggle nested folders
+            }
             // Toggle visibility based on folder state
             item.style.display = toggleMode === 'expand' ? 'block' : 'none';
         }
@@ -547,7 +622,7 @@ async function fetchAndCreateDirectoryStructure(url) {
     }
 }
 
-function createDirectoryStructure(data, parentDiv, level, path="") {
+function createDirectoryStructure(data, parentDiv, level = 1, path = "") {
     for (const [key, value] of Object.entries(data)) {
         const div = document.createElement('div');
         lang = key.split('.').pop();
@@ -596,12 +671,93 @@ function createDirectoryStructure(data, parentDiv, level, path="") {
         if (typeof value === 'object') {
             level++
             createDirectoryStructure(value, parentDiv, level, path + key + "/");
+            level-- // Reset level after processing folder
         }
     }
 }
 
 async function renamefile() {
-    
+    const selectedElement = document.getElementsByClassName("selected")[0];
+    if (selectedElement) {
+        const labelContainer = selectedElement.querySelector(".monaco-icon-label-container");
+        console.log(selectedElement.innerHTML);
+        if (labelContainer) {
+            labelContainer.style.display = "none";
+        } else {
+            console.error("Label container not found.");
+        }
+        const iconLabel = selectedElement.querySelector(".monaco-icon-label");
+        if (iconLabel) {
+            iconLabel.innerHTML += `<div class="monaco-inputbox idle synthetic-focus" style="background-color: var(--vscode-input-background); color: var(--vscode-input-foreground); border: 1px solid var(--vscode-input-border, transparent);">
+                                                                                <div class="ibwrapper">
+                                                                                    <input class="input empty" autocorrect="off" autocapitalize="off" spellcheck="false" type="text" wrap="off" aria-label="Type file name. Press Enter to confirm or Escape to cancel." style="background-color: inherit; color: var(--vscode-input-foreground);" fdprocessedid="ycd0b">
+                                                                                </div>
+                                                                            </div>`;
+            const lastInput = document.getElementsByClassName("input")[0];
+            const labelDiv = lastInput.closest(".monaco-icon-label");
+
+            lastInput.focus();
+
+            let confirmed = false; // Flag to check if Enter was pressed
+
+            // Handle typing to dynamically update the classes
+            lastInput.oninput = function () {
+                const fileName = lastInput.value.trim();
+                const ext = fileName.split('.').pop().toLowerCase();
+
+                // Default class list for unknown file types
+                let classList = `monaco-icon-label file-icon codespaces-blank-name-dir-icon ${fileName}-name-file-icon ${ext}ext-file-icon ${ext}-lang-file-icon explorer-item`;
+
+                if (ext === "js") {
+                    classList = "monaco-icon-label file-icon codespaces-blank-name-dir-icon script.js-name-file-icon name-file-icon js-ext-file-icon ext-file-icon javascript-lang-file-icon explorer-item";
+                } else if (ext === "py") {
+                    classList = "monaco-icon-label file-icon codespaces-blank-name-dir-icon index.py-name-file-icon name-file-icon python-ext-file-icon ext-file-icon python-lang-file-icon explorer-item";
+                } else if (ext === "sh") {
+                    classList = "monaco-icon-label file-icon codespaces-blank-name-dir-icon index.sh-name-file-icon name-file-icon shellscript-ext-file-icon ext-file-icon shellscript-lang-file-icon explorer-item";
+                } else if (ext === "cs") {
+                    classList = "monaco-icon-label file-icon codespaces-blank-name-dir-icon index.cs-name-file-icon name-file-icon csharp-ext-file-icon ext-file-icon csharp-lang-file-icon explorer-item";
+                } else if (ext === "png" || ext === "jpg" || ext === "jpeg" || ext === "gif" || ext === "svg" || ext === "ico" || ext === "webp" || ext === "bmp" || ext === "tiff" || ext === "tif" || ext === "psd") {
+                    classList = "monaco-icon-label file-icon codespaces-blank-name-dir-icon hi.png-name-file-icon name-file-icon png-ext-file-icon ext-file-icon unknown-lang-file-icon explorer-item monaco-decoration-itemColor--ec98p9 monaco-decoration-itemBadge--ec98p9 monaco-decoration-iconBadge--ec98p9";
+                }
+
+                // Update the class list of the label div
+                labelDiv.className = classList;
+            };
+
+            // Handle Enter key to replace input with span
+            lastInput.onkeydown = function (e) {
+                if (e.key === "Enter" && lastInput.value.trim() !== "") {
+                    confirmed = true; // Set the flag to true
+                    const inputValue = lastInput.value.trim();
+                    if (selectedElement && selectedElement.hasAttribute('data-filepath')) {
+                        path = selectedElement.getAttribute('data-filepath') + "/" + inputValue;
+                    } else {
+                        path = inputValue;
+                    }
+
+                    lastInput.parentElement.parentElement.classList.remove("synthetic-focus");
+                    lastInput.parentElement.parentElement.style.backgroundColor = "transparent";
+                    lastInput.parentElement.parentElement.style.border = "none";
+                    lastInput.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.setAttribute('data-filepath', path);
+
+                    // Replace input with span showing the entered text
+                    lastInput.parentElement.innerHTML = `<div class="monaco-icon-label-container" style="height: 22px;"><span class="monaco-icon-name-container"><a class="label-name"><span class="monaco-highlighted-label" style="height: 22px; display: block; padding-top: 2px;">${inputValue}</span></a></span></div>`;
+
+                    saveFile(path, "");
+                }
+            };
+
+            // Handle blur event to remove the div if Enter was not pressed
+            lastInput.onblur = function () {
+                if (!confirmed) { // Only remove if Enter wasn't pressed
+                    const parentDiv = lastInput.closest(".monaco-list-row");
+                    if (parentDiv) {
+                        parentDiv.remove();
+                    }
+                }
+            };
+        }
+    }
 }
 
 async function deletefile() {
@@ -611,6 +767,23 @@ async function deletefile() {
     }
     const filePath = document.getElementsByClassName("selected")[0].getAttribute("data-filepath");
     document.getElementsByClassName("selected")[0].remove();
+    // Remove the tab if it is opened
+    const tabsContainer = document.getElementById("tabs");
+    const tabToRemove = tabsContainer.querySelector(`[data-resource-name="${filePath}"]`);
+    if (tabToRemove) {
+        tabToRemove.remove();
+        handleTabDeletion();
+    }
+
+    // Switch to another tab if available
+    const remainingTabs = tabsContainer.querySelectorAll(".tab");
+    if (remainingTabs.length > 0) {
+        const firstTab = remainingTabs[0];
+        activateTab(firstTab, firstTab.getAttribute('data-resource-name'));
+    } else {
+        // No tabs left, hide the editor container
+        document.getElementById("editor-container").style.display = "none";
+    }
     try {
         const response = await fetch(`https://quizizzvscodehost.blaub002-302.workers.dev/delete/${currentProject}/${filePath}`, {
             method: 'POST',
