@@ -105,6 +105,11 @@ async function initMonacoEditor(filename, lang) {
             require(['vs/editor/editor.main'], function () {
                 initializeEditor(filename, lang, content, theme);
                 isMonacoInitialized = true;
+                if (!isEmmetRegistered) {
+                    console.log("Registering Emmet...");
+                    emmetMonaco.emmetHTML(monaco);
+                    isEmmetRegistered = true;
+                }
             });
         } else {
             initializeEditor(filename, lang, content, theme);
