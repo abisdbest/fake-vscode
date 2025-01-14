@@ -456,7 +456,7 @@ function addfile() {
     };
 
     // Handle Enter key to replace input with span
-    lastInput.onkeydown = function (e) {
+    lastInput.onkeydown = async function (e) {
         if (e.key === "Enter" && lastInput.value.trim() !== "") {
             confirmed = true; // Set the flag to true
             const inputValue = lastInput.value.trim();
@@ -692,27 +692,29 @@ async function renamefile() {
             console.error("Label container not found.");
         }
         const iconLabel = selectedElement.querySelector(".monaco-icon-label");
+        var oldname = selectedElement.getAttribute('data-filepath');
+        const oldinnerhtml = iconLabel.innerHTML;
         if (iconLabel) {
-            iconLabel.innerHTML += `<div class="monaco-inputbox idle synthetic-focus" style="background-color: var(--vscode-input-background); color: var(--vscode-input-foreground); border: 1px solid var(--vscode-input-border, transparent);">
+            iconLabel.innerHTML = `<div class="monaco-inputbox idle synthetic-focus" style="background-color: var(--vscode-input-background); color: var(--vscode-input-foreground); border: 1px solid var(--vscode-input-border, transparent);">
                                                                                 <div class="ibwrapper">
                                                                                     <input class="input empty" autocorrect="off" autocapitalize="off" spellcheck="false" type="text" wrap="off" aria-label="Type file name. Press Enter to confirm or Escape to cancel." style="background-color: inherit; color: var(--vscode-input-foreground);" fdprocessedid="ycd0b">
                                                                                 </div>
                                                                             </div>`;
             const lastInput = document.getElementsByClassName("input")[0];
             const labelDiv = lastInput.closest(".monaco-icon-label");
-
+        
             lastInput.focus();
-
+        
             let confirmed = false; // Flag to check if Enter was pressed
-
+        
             // Handle typing to dynamically update the classes
             lastInput.oninput = function () {
                 const fileName = lastInput.value.trim();
                 const ext = fileName.split('.').pop().toLowerCase();
-
+        
                 // Default class list for unknown file types
                 let classList = `monaco-icon-label file-icon codespaces-blank-name-dir-icon ${fileName}-name-file-icon ${ext}ext-file-icon ${ext}-lang-file-icon explorer-item`;
-
+        
                 if (ext === "js") {
                     classList = "monaco-icon-label file-icon codespaces-blank-name-dir-icon script.js-name-file-icon name-file-icon js-ext-file-icon ext-file-icon javascript-lang-file-icon explorer-item";
                 } else if (ext === "py") {
@@ -724,40 +726,57 @@ async function renamefile() {
                 } else if (ext === "png" || ext === "jpg" || ext === "jpeg" || ext === "gif" || ext === "svg" || ext === "ico" || ext === "webp" || ext === "bmp" || ext === "tiff" || ext === "tif" || ext === "psd") {
                     classList = "monaco-icon-label file-icon codespaces-blank-name-dir-icon hi.png-name-file-icon name-file-icon png-ext-file-icon ext-file-icon unknown-lang-file-icon explorer-item monaco-decoration-itemColor--ec98p9 monaco-decoration-itemBadge--ec98p9 monaco-decoration-iconBadge--ec98p9";
                 }
-
+        
                 // Update the class list of the label div
                 labelDiv.className = classList;
             };
-
+        
             // Handle Enter key to replace input with span
-            lastInput.onkeydown = function (e) {
+            lastInput.onkeydown = async function (e) {
                 if (e.key === "Enter" && lastInput.value.trim() !== "") {
                     confirmed = true; // Set the flag to true
                     const inputValue = lastInput.value.trim();
-                    if (selectedElement && selectedElement.hasAttribute('data-filepath')) {
-                        path = selectedElement.getAttribute('data-filepath') + "/" + inputValue;
-                    } else {
-                        path = inputValue;
-                    }
-
+                    let path;
+                    path = inputValue;
+        
                     lastInput.parentElement.parentElement.classList.remove("synthetic-focus");
                     lastInput.parentElement.parentElement.style.backgroundColor = "transparent";
                     lastInput.parentElement.parentElement.style.border = "none";
                     lastInput.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.setAttribute('data-filepath', path);
-
+        
                     // Replace input with span showing the entered text
                     lastInput.parentElement.innerHTML = `<div class="monaco-icon-label-container" style="height: 22px;"><span class="monaco-icon-name-container"><a class="label-name"><span class="monaco-highlighted-label" style="height: 22px; display: block; padding-top: 2px;">${inputValue}</span></a></span></div>`;
-
-                    saveFile(path, "");
+        
+                    try {
+                        const response = await fetch('https://quizizzvscodehost.blaub002-302.workers.dev/rename/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ oldPath: currentProject + "/" + oldname, newPath: currentProject + "/" + path })
+                        });
+        
+                        if (!response.ok) {
+                            const errorData = await response.json(); // Try to parse error response
+                            const errorMessage = errorData.message || response.statusText; // Use detailed error if available
+                            throw new Error(`File rename failed: ${errorMessage}`);
+                        }
+        
+                        const data = await response.text(); //Get success message from server response
+                        console.log(data); // Display success message (e.g., '"oldPath" renamed to "newPath" successfully')
+                    } catch (error) {
+                        console.error('Error renaming file:', error);
+                        // Handle error appropriately, e.g., display an error message to the user.
+                    }
                 }
             };
-
+        
             // Handle blur event to remove the div if Enter was not pressed
             lastInput.onblur = function () {
                 if (!confirmed) { // Only remove if Enter wasn't pressed
                     const parentDiv = lastInput.closest(".monaco-list-row");
                     if (parentDiv) {
-                        parentDiv.remove();
+                        iconLabel.innerHTML = oldinnerhtml;
                     }
                 }
             };
@@ -826,7 +845,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
     eruda.init()
 
-    const serverUrl = 'https://quizizzvscodehost.blaub002-302.workers.dev/project/exampleproject'; // Replace with your server URL
+    const serverUrl = 'https://quizizzvscodehost.blaub002-302.workers.dev/project/' + currentProject; // Replace with your server URL
     fetchAndCreateDirectoryStructure(serverUrl);
-    eruda.init();
 });
