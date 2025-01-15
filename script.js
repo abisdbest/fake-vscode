@@ -685,15 +685,14 @@ async function renamefile() {
     const selectedElement = document.getElementsByClassName("selected")[0];
     if (selectedElement) {
         const labelContainer = selectedElement.querySelector(".monaco-icon-label-container");
-        console.log(selectedElement.innerHTML);
+        const iconLabel = selectedElement.querySelector(".monaco-icon-label");
+        const oldinnerhtml = iconLabel.innerHTML;
         if (labelContainer) {
             labelContainer.style.display = "none";
         } else {
             console.error("Label container not found.");
         }
-        const iconLabel = selectedElement.querySelector(".monaco-icon-label");
         var oldname = selectedElement.getAttribute('data-filepath');
-        const oldinnerhtml = iconLabel.innerHTML;
         if (iconLabel) {
             iconLabel.innerHTML = `<div class="monaco-inputbox idle synthetic-focus" style="background-color: var(--vscode-input-background); color: var(--vscode-input-foreground); border: 1px solid var(--vscode-input-border, transparent);">
                                                                                 <div class="ibwrapper">
