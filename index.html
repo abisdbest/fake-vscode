@@ -1,7 +1,20 @@
-<html><head>
-    <script src="https://cdn.jsdelivr.net/npm/eruda" type="text/javascript" charset="utf-8"></script><style type="text/css">.eruda-search-highlight-block{display:inline}.eruda-search-highlight-block .eruda-keyword{background:#332a00;color:#ffcb6b}</style>
-    <script type="text/javascript" charset="utf-8">
-        eruda.init()
+<html>
+
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/eruda" async></script>
+    <style type="text/css">
+        .eruda-search-highlight-block {
+            display: inline;
+        }
+
+        .eruda-search-highlight-block .eruda-keyword {
+            background: #332a00;
+            color: #ffcb6b;
+        }
+    </style>
+    <script>
+        // Initialize Eruda
+        eruda.init();
     </script>
     <!-- Import map to include @google/generative-ai -->
     <script type="importmap">
@@ -12,62 +25,182 @@
       }
     </script>
     <style>
-      body {
-        font-family: Arial, sans-serif;
-      }
-      .response-container {
-        margin: 20px;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        max-width: 600px;
-      }
-      .model-response {
-        margin-bottom: 10px;
-      }
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .response-container {
+            margin: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            max-width: 600px;
+        }
+
+        .model-response {
+            margin-bottom: 10px;
+        }
+
+        .preview-container {
+            margin: 20px;
+            padding: 10px;
+            border: 1px solid #888;
+            border-radius: 5px;
+            background: #f9f9f9;
+            max-width: 800px;
+            overflow: auto;
+        }
     </style>
-  </head><div id="eruda" style="all: initial;"></div><div class="__chobitsu-hide__" style="all: initial;"></div>
-  <body>
+</head>
+
+<body>
     <h1>Gemini Models Conversation</h1>
     <div id="responses" class="response-container"></div>
+    <div id="preview" class="preview-container">
+
+    </div>
 
     <script type="module">
-      // Import the library using the importmap
-      import { GoogleGenerativeAI } from "@google/generative-ai";
+        import { GoogleGenerativeAI } from "@google/generative-ai";
 
-      // Use the provided API key
-      const API_KEY1 = "AIzaSyB3lmQJddVZA9dvJrlXPJGyD-Mg-c6PH2Y";
-    //   const API_KEY2 = "AIzaSyDtVzBfUo3W4nEIQl69hGmF5ibuh17CR5M";
+        const API_KEY = "AIzaSyB3lmQJddVZA9dvJrlXPJGyD-Mg-c6PH2Y";
+        // List of API keys
+        const API_KEYS = [
+            "AIzaSyB3lmQJddVZA9dvJrlXPJGyD-Mg-c6PH2Y",
+            "AIzaSyDtVzBfUo3W4nEIQl69hGmF5ibuh17CR5M",
+            "AIzaSyCox_81VohjBRwZOIknLglfT9Q3FW8XfaM",
+            "AIzaSyClW7PrhHAIxr-9Q8C2vrDgcWsDejZ0eKc",
+            "AIzaSyD0T8ipfT3ClP8QhXEYpTDuihZy2KCMiRs",
+            "AIzaSyBFoJczSY-ZJbbUfCHYCDD6LvQiCXI33Nw",
+            "AIzaSyAHl-dEiY7uyKYpkdXKENXyoZYLxM3G2JA",
+            "AIzaSyDNbBHvN_sd0ds7Bv8JnLKSCAKBxh5QtZc"
+        ];
 
-      // Initialize the Generative AI service
-      const genAI = new GoogleGenerativeAI(API_KEY1);
-    //   const genAI2 = new GoogleGenerativeAI(API_KEY2);
+        // Index to track the current API key
+        let currentKeyIndex = 0;
 
-      // Initialize two instances of the Gemini 1.5 Flash model
-      const model = genAI.getGenerativeModel({
-        model: "gemini-2.0-flash-exp",
-        systemInstruction: "you are going to help generate a full 1 page html website. you will be told what website to generate and you will return a concise description of all steps needed to do so. have in mind these steps will just be for generating code, as you cannot test. you will call the generatefrominstructions(list) function to do so. for example retrun just whats in these curly brackets: {generatefrominstructions('do this', 'do that', 'then that')}",
-      });
-      
-      // Function to print responses to the page
-      function printResponse(model, text) {
-        const responsesDiv = document.getElementById("responses");
-        const newResponse = document.createElement("div");
-        newResponse.classList.add("model-response");
-        newResponse.innerText = text;
-        responsesDiv.appendChild(newResponse);
-      }
+        const genAI = new GoogleGenerativeAI(API_KEY);
 
-      // Function to make the two models continuously talk to each other
-      async function continuousConversation() {
-          const response = await model.generateContent("generate a coding website");
-          prompt = response.response.text();
-          printResponse("Model 1", prompt);
-      }
+        const mainModel = genAI.getGenerativeModel({
+            model: "gemini-2.0-flash-exp",
+            systemInstruction: `
+            Generate a series of clear, concise instructions to modify or create an HTML page. 
+            Each instruction should be in plain English and separated by commas. The instructions should guide step-by-step actions, 
+            such as adding HTML elements, applying CSS styles, or adding content. 
+            Example instructions: 
+            "Add a few <div> elements with class 'container', then style them using CSS style tags, 
+            then add content inside the div elements like 'Welcome to my website'."
+            Make sure instructions are efficient, logically ordered, and avoid unnecessary repetition.
+            Return all instructions in a single line, separated by commas, without extra explanations or formatting.`
+        });
 
-      // Start the conversation
-      continuousConversation();
+        const schema = {
+            description: "Edit instruction for modifying HTML",
+            type: "object",
+            properties: {
+                action: {
+                    type: "string",
+                    description: "Action to perform: replace, insert, or delete",
+                    enum: ["replace", "insert", "delete"],
+                },
+                target: {
+                    type: "string",
+                    description: "CSS selector for the target element",
+                },
+                content: {
+                    type: "string",
+                    description: "HTML content for replace/insert",
+                    nullable: true,
+                    maxLength: 5000, // Limit content size
+                    pattern: "^(?!.*<!DOCTYPE html>).*", // Disallow <!DOCTYPE html>
+                },
+            },
+            required: ["action", "target"],
+        };
+
+
+
+        // Function to get the next API key
+        function getNextApiKey() {
+            const apiKey = API_KEYS[currentKeyIndex];
+            currentKeyIndex = (currentKeyIndex + 1) % API_KEYS.length; // Cycle through the keys
+            return apiKey;
+        }
+
+        // Function to create a generative model with the next API key
+        function createGenerativeModel() {
+            const API_KEY = getNextApiKey(); // Get the next API key
+            const genAI = new GoogleGenerativeAI(API_KEY); // Initialize GoogleGenerativeAI with the API key
+
+            return genAI.getGenerativeModel({
+                model: "gemini-1.5-pro",
+                generationConfig: {
+                    responseMimeType: "application/json", // Ensure JSON response
+                    responseSchema: schema, // Use the predefined schema
+                },
+            });
+        }
+
+        // Getter for the model
+        const secondaryModel = createGenerativeModel();
+
+
+
+        const previewDiv = document.getElementById("preview");
+
+        // Function to apply a single edit instruction to the HTML
+        function applyEditInstruction(currentHTML, edit) {
+            let parser = new DOMParser();
+            let doc = parser.parseFromString(currentHTML, "text/html");
+
+            switch (edit.action) {
+                case 'replace':
+                    const replaceElement = doc.querySelector(edit.target);
+                    if (replaceElement) replaceElement.innerHTML = edit.content;
+                    break;
+                case 'insert':
+                    const insertElement = doc.querySelector(edit.target);
+                    if (insertElement) insertElement.innerHTML += edit.content;
+                    break;
+                case 'delete':
+                    const deleteElement = doc.querySelector(edit.target);
+                    if (deleteElement) deleteElement.remove();
+                    break;
+                default:
+                    console.error(`Unknown action: ${edit.action}`);
+            }
+
+            return doc.documentElement.innerHTML;
+        }
+
+        // Function to dynamically process instruction via the secondary model
+        async function processInstruction(currentHTML, instruction) {
+            const response = await secondaryModel.generateContent(`HTML:${currentHTML}, Instruction:${instruction}`);
+            var editInstruction = response.response.text();
+            editInstruction = JSON.parse(editInstruction);
+            console.log(`Instruction: ${instruction}, Edit:`, editInstruction);
+            return applyEditInstruction(currentHTML, editInstruction);
+        }
+
+        // Main function to process AI instructions sequentially
+        async function continuousConversation() {
+            const response = await mainModel.generateContent("Generate a coding website");
+            const instructions = response.response.text().split(',');
+            let currentHTML = previewDiv.innerHTML;
+
+            for (const instruction of instructions) {
+                console.log(`Processing: ${instruction.trim()}`);
+                currentHTML = await processInstruction(currentHTML, instruction.trim());
+                previewDiv.innerHTML = currentHTML; // Update the preview div
+                console.log(currentHTML)
+            }
+
+            console.log("All instructions processed.");
+        }
+
+        // Start the process
+        continuousConversation();
     </script>
-  
+</body>
 
-</body></html>
+</html>
