@@ -84,15 +84,36 @@
         const mainModel = genAI.getGenerativeModel({
             model: "gemini-2.0-flash-exp",
             systemInstruction: `
-            Generate a series of clear, concise instructions to modify or create an HTML page. 
-            Each instruction should be in plain English and separated by commas. The instructions should guide step-by-step actions, 
-            such as adding HTML elements, applying CSS styles, or adding content. 
-            Example instructions: 
-            "Add a few <div> elements with class 'container', then style them using CSS style tags, 
-            then add content inside the div elements like 'Welcome to my website'."
-            Make sure instructions are efficient, logically ordered, and avoid unnecessary repetition.
-            Return all instructions in a single line, separated by commas, without extra explanations or formatting.`
+                Generate a detailed and comprehensive series of instructions to modify or create an HTML page step-by-step. 
+                Each instruction should be clear, precise, and logically ordered, covering all necessary details. 
+
+                **Key Guidelines:**
+                - Include specific CSS selectors (e.g., target specific elements like ".container" or "#main-header") for where edits will be applied.
+                - Specify whether the action involves inserting, replacing, deleting, adding CSS, or adding JavaScript.
+                - When including images, explicitly mention the source URL: https://quizizz-image-generation.blaub002-302.workers.dev/?prompt= + the image description.
+                - Ensure the design follows modern web standards with professional aesthetics, comparable to websites created by companies like Microsoft or Google.
+                - For any functionality requiring JavaScript:
+                    - Generate as much JavaScript as needed, even if it requires a large amount of code to achieve complex functionality.
+                    - Ensure that complete functions, including all variable declarations, are added. Avoid leaving any incomplete code snippets.
+                    - Always structure JavaScript code to be modular and well-commented for readability and maintainability.
+                    - Include JavaScript in a way that ensures seamless integration and functionality.
+
+                **Examples of Clear Instructions:**
+                - "Add a <div> with class 'main-content' and text 'Welcome to our website!' inside the <body> tag."
+                - "Insert CSS to style all buttons with a blue background, white text, and rounded corners. Target: <style> tag."
+                - "Replace the existing image in #header with an image generated from: https://quizizz-image-generation.blaub002-302.workers.dev/?prompt=A futuristic cityscape at sunset."
+                - "Add a <script> to implement a dynamic search functionality, with an input field, search button, and results container. Include all necessary functions and variables. Target: <body> tag."
+                - "Insert JavaScript to create a carousel with next/previous buttons and infinite scrolling. Ensure all functionality is self-contained and modular."
+
+                **Desired Standard:**
+                - The final output should look and feel like a professionally designed website created by a top-tier company such as Microsoft or Google.
+                - The visual style should be modern, clean, and user-friendly, with responsive design principles in mind.
+
+                **Output Format:**
+                - Provide all instructions in a single line, separated by commas, without extra explanations or formatting.
+            `
         });
+
 
         const schema = {
             description: "Edit instruction for modifying HTML",
