@@ -1,7 +1,7 @@
 <html>
 
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/eruda" async></script>
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <style type="text/css">
         .eruda-search-highlight-block {
             display: inline;
@@ -42,23 +42,20 @@
         }
 
         .preview-container {
-            margin: 20px;
-            padding: 10px;
-            border: 1px solid #888;
-            border-radius: 5px;
-            background: #f9f9f9;
-            max-width: 800px;
+            border: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
             overflow: auto;
         }
     </style>
 </head>
 
 <body>
-    <h1>Gemini Models Conversation</h1>
-    <div id="responses" class="response-container"></div>
-    <div id="preview" class="preview-container">
-
-    </div>
+    <iframe id="preview" class="preview-container">
+    </iframe>
 
     <script type="module">
         import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -81,21 +78,26 @@
             model: "gemini-2.0-flash-exp",
             systemInstruction: `
                 Generate a detailed and comprehensive series of instructions to modify or create an HTML page step-by-step. 
-                Each instruction should be clear, precise, and logically ordered, covering all necessary details. 
+                Each instruction should be clear, precise, and logically ordered, covering all necessary details - but may include a variety of edits together. 
 
                 **Key Guidelines:**
-                - Include specific CSS selectors (e.g., target specific elements like ".container" or "#main-header") for where edits will be applied.
+                - everything is in 1 already created html file. css in a style tag, js in a script tag.
+                - Include specific CSS selectors (e.g., target specific elements like ".container" or "#main-header > button") for where edits will be applied, but not / or :contains for example.
                 - Specify whether the action involves inserting, replacing, deleting, adding CSS, or adding JavaScript.
                 - When including images, explicitly mention the source URL: https://quizizz-image-generation.blaub002-302.workers.dev/?prompt= + the image description.
+                - The program executing your instructions can generate content to you can for example say make a span with a pretend description of a game for example etc...
                 - Ensure the design follows modern web standards with professional aesthetics, comparable to websites created by companies like Microsoft or Google.
                 - For any functionality requiring JavaScript:
+                    - For js it will insert it into a script.
                     - Generate as much JavaScript as needed, even if it requires a large amount of code to achieve complex functionality.
                     - Ensure that complete functions, including all variable declarations, are added. Avoid leaving any incomplete code snippets.
                     - Always structure JavaScript code to be modular and well-commented for readability and maintainability.
                     - Include JavaScript in a way that ensures seamless integration and functionality.
+                    - careful with js though, as it can only be added to the script tag - not edited, otherwise the program breaks
 
                 **Examples of Clear Instructions:**
                 - "Add a <div> with class 'main-content' and text 'Welcome to our website!' inside the <body> tag."
+                - "create a style tag inside body"
                 - "Insert CSS to style all buttons with a blue background, white text, and rounded corners. Target: <style> tag."
                 - "Replace the existing image in #header with an image generated from: https://quizizz-image-generation.blaub002-302.workers.dev/?prompt=A futuristic cityscape at sunset."
                 - "Add a <script> to implement a dynamic search functionality, with an input field, search button, and results container. Include all necessary functions and variables. Target: <body> tag."
@@ -147,21 +149,17 @@
         // Function to create a generative model with the next API key
         function createGenerativeModel() {
             const API_KEY = getNextApiKey(); // Get the next API key
+            console.log(API_KEY)
             const genAI = new GoogleGenerativeAI(API_KEY); // Initialize GoogleGenerativeAI with the API key
 
             return genAI.getGenerativeModel({
-                model: "gemini-1.5-pro",
+                model: "gemini-1.5-flash",
                 generationConfig: {
                     responseMimeType: "application/json", // Ensure JSON response
                     responseSchema: schema, // Use the predefined schema
                 },
             });
         }
-
-        // Getter for the model
-        const secondaryModel = createGenerativeModel();
-
-
 
         const previewDiv = document.getElementById("preview");
 
@@ -176,8 +174,12 @@
                     if (replaceElement) replaceElement.innerHTML = edit.content;
                     break;
                 case 'insert':
-                    const insertElement = doc.querySelector(edit.target);
-                    if (insertElement) insertElement.innerHTML += edit.content;
+                    if (edit.target == "") {
+                      
+                    } else {
+                      const insertElement = doc.querySelector(edit.target);
+                      if (insertElement) insertElement.innerHTML += edit.content;
+                    }
                     break;
                 case 'delete':
                     const deleteElement = doc.querySelector(edit.target);
@@ -192,7 +194,7 @@
 
         // Function to dynamically process instruction via the secondary model
         async function processInstruction(currentHTML, instruction) {
-            const response = await secondaryModel.generateContent(`HTML:${currentHTML}, Instruction:${instruction}`);
+            const response = await createGenerativeModel().generateContent(`HTML:${currentHTML}, Instruction:${instruction}`);
             var editInstruction = response.response.text();
             editInstruction = JSON.parse(editInstruction);
             console.log(`Instruction: ${instruction}, Edit:`, editInstruction);
@@ -203,12 +205,12 @@
         async function continuousConversation() {
             const response = await mainModel.generateContent("Generate a coding website");
             const instructions = response.response.text().split(',');
-            let currentHTML = previewDiv.innerHTML;
+            let currentHTML = previewDiv.srcdoc;
 
             for (const instruction of instructions) {
                 console.log(`Processing: ${instruction.trim()}`);
                 currentHTML = await processInstruction(currentHTML, instruction.trim());
-                previewDiv.innerHTML = currentHTML; // Update the preview div
+                previewDiv.srcdoc = currentHTML; // Update the preview div
                 console.log(currentHTML)
             }
 
