@@ -2,7 +2,6 @@
 
 <head>
     <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <style type="text/css">
         .eruda-search-highlight-block {
             display: inline;
@@ -43,20 +42,22 @@
         }
 
         .preview-container {
-            border: none;
             position: fixed;
             top: 0;
             left: 0;
+            padding: none;
+            border: none;
+            border-radius: 5px;
+            background: #f9f9f9;
             width: 100%;
             height: 100vh;
-            overflow: auto;
+            overflow-y: scroll;
         }
     </style>
 </head>
 
 <body>
-    <iframe id="preview" class="preview-container">
-    </iframe>
+    <iframe id="preview-iframe" class="preview-container" srcdoc='<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Document</title><style></style></head><body><header></header><div class="main-content"></div><script></script></body></html>'></iframe>
 
     <script type="module">
         import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -65,9 +66,10 @@
         // List of API keys
         const API_KEYS = [
             "AIzaSyB3lmQJddVZA9dvJrlXPJGyD-Mg-c6PH2Y",
-            "AIzaSyBSwB1zvULUmCO2CHS3fhrbo-LrUIs8tRg",
+            "AIzaSyD4t677YXiw2nR9dW2pk74RXw0iSaXJIkc",
+            "AIzaSyBrMvWg8sX8KuHdatYOgBLXM4BrLqKgqUE",
             "AIzaSyBkpR4uznS-GAtaATcCZkoDIGb8A7wIbOs",
-            "AIzaSyBrMvWg8sX8KuHdatYOgBLXM4BrLqKgqUE"
+            "AIzaSyBSwB1zvULUmCO2CHS3fhrbo-LrUIs8tRg"
         ];
 
         // Index to track the current API key
@@ -78,54 +80,59 @@
         const mainModel = genAI.getGenerativeModel({
             model: "gemini-2.0-flash-exp",
             systemInstruction: `
-                Generate a detailed and comprehensive series of instructions to modify or create an HTML page step-by-step. 
-                Each instruction should be clear, precise, and logically ordered, covering all necessary details - but may include a variety of edits together. 
-
-                **Key Guidelines:**
-                - everything is in 1 already created html file. css in a style tag, js in a script tag.
-                - Include specific CSS selectors (e.g., target specific elements like ".container" or "#main-header > button") for where edits will be applied, but not / or :contains for example.
-                - Specify whether the action involves inserting, replacing, deleting, adding CSS, or adding JavaScript.
-                - When including images, explicitly mention the source URL: https://quizizz-image-generation.blaub002-302.workers.dev/?prompt= + the image description.
-                - The program executing your instructions can generate content to you can for example say make a span with a pretend description of a game for example etc...
-                - Ensure the design follows modern web standards with professional aesthetics, comparable to websites created by companies like Microsoft or Google.
-                - For any functionality requiring JavaScript:
-                    - For js it will insert it into a script.
-                    - Generate as much JavaScript as needed, even if it requires a large amount of code to achieve complex functionality.
-                    - Ensure that complete functions, including all variable declarations, are added. Avoid leaving any incomplete code snippets.
-                    - Always structure JavaScript code to be modular and well-commented for readability and maintainability.
-                    - Include JavaScript in a way that ensures seamless integration and functionality.
-                    - careful with js though, as it can only be added to the script tag - not edited, otherwise the program breaks
-
-                **Examples of Clear Instructions:**
-                - "Add a <div> with class 'main-content' and text 'Welcome to our website!' inside the <body> tag."
-                - "create a style tag inside body"
-                - "Insert CSS to style all buttons with a blue background, white text, and rounded corners. Target: <style> tag."
-                - "Replace the existing image in #header with an image generated from: https://quizizz-image-generation.blaub002-302.workers.dev/?prompt=A futuristic cityscape at sunset."
-                - "Add a <script> to implement a dynamic search functionality, with an input field, search button, and results container. Include all necessary functions and variables. Target: <body> tag."
-                - "Insert JavaScript to create a carousel with next/previous buttons and infinite scrolling. Ensure all functionality is self-contained and modular."
-
-                **Desired Standard:**
-                - The final output should look and feel like a professionally designed website created by a top-tier company such as Microsoft or Google.
-                - The visual style should be modern, clean, and user-friendly, with responsive design principles in mind.
-
-                **Output Format:**
-                - Provide all instructions in a single line, separated by commas, without extra explanations or formatting.
-            `
+            Generate a very very long (normaly it will be REALLY long - sometimes even up to 100s of instructions) series of clear, concise instructions to modify or create an index.html page that is already created - you cannot link css or js files, all in script or style tags - for the website the user specifies, or the user may put in a fictional webiste url, and you will generate what a functional website lcalled that would have. 
+            Each instruction should be in plain English and separated by ¶ (dont use comments in instructions). The instructions should guide step-by-step actions,  including where in page to add elements, like main elements would be in the body, or all scripts beign in the same script tag etc. - obciously ensuring script and style tags are already created.
+            From the start, the basic page structure will be there already, like html, head (with a title and style tag already), body (with a style tag already), etc. - but you will need to add all the elements, styles, and content to make it a fully functional website. Here is how the html starts:
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Document</title>
+                    <style></style>
+                </head>
+                <body>
+                    <header></header>
+                    <div class="main-content"></div>
+                    <script></` + `script>
+                </b` + `ody>
+                </html>
+            Your first instruction should be to add a style tag in the head tag, and a script tag in the body tag.
+            Emphasise that js should be in script tags, and css in style tags every time you need to add them - tell the ai to always "insert" in script/style tag the css..."
+            such as adding HTML elements, applying CSS styles in style tags (you dont need to specify the css code, just what styles to apply), or adding content. 
+            ALWAYS MAKE SURE TO ADD THE ELEMENTS IN THE BODY TAG, AND THE STYLES IN THE HEAD TAG
+            Make sure to properly and very nicely style the entire page according to what the user wants (do not let anything look at all unproffessional), and as much js as needed for the functionality the user is looking for.
+            Have in mind that css and js cannot be modified, only added to, so make sure to do full css classes in style tags, and js functions at a time, you may need to emphasise to do the whole function, linking to variables and functions not yet created, as there is a limit to how much can be done in 1 step.
+            Also emphasise not to repeat code or definitions, and to make sure the code is as clean and efficient as possible.
+            Also the ai executing the instructions will not know what to write as content for elements, so ask for example, span with a pretend name of a game website, or ask to make a p with an pretend description of a game, always for content tell it to generate pretend things etc. this is similiar with js or css styling - you can simply say add a hover effect that does x or a scroll effect that does y, or add nice modern colors and box shadow to this element etc. 
+            For different types of websites you may need to add different types of elements, styles, and content, so make sure to adapt to the user's needs, for example if the user wants a website that doesnt need much js, focus on loads of styles including hover effects, click effects, and a clean page that fits the screen - like headers fitting by being position fixed, and aligned correctly and correct widths etc there is so much to do, but for a website that needs a lot of js, make sure to add all the js needed for the functionality, but make sure the page is still clean and professional.
+            Do not stop at a basic website, add as much functionality as needed, like a button that does something, would not alert what the button does - it should actually work!
+            Also for images, you can tell it to have an image with the src of https://quizizz-image-generation.blaub002-302.workers.dev/?prompt= + a description of the image, and it will generate an image for you.
+            - but DO NOT simple have an image with src of screenshot of what it should look like - use images only for proper content.
+            Example instructions: 
+            "Add a few <div> elements with class 'container', style the .container elements using CSS style tags, 
+            then add content inside the div elements like 'Welcome to my website', make the .button button have an onclick that it executes start() function."
+            Make sure instructions are efficient, logically ordered, and avoid unnecessary repetition.
+            Return all instructions in a single line, separated by ¶, without extra explanations or formatting.
+            The finished result should have a high level of complexity as if made by a professional web developing company like google or microsoft.
+            AFTERWARDS, ALWAYS FIX UP AND ADD STYLES TO THE PAGE TO MAKE IT LOOK MORE AND MORE AND MORE PROFESSIONAL LIKE SCROLLING EFFECTS HOVER EFFECTS ANIMATIONS ETC, AND MAKE SURE TO ADD ANY JS NEEDED FOR FUNCTIONALITY.
+            `,
         });
 
 
         const schema = {
-            description: "Edit instruction for modifying HTML",
+            description: "Edit instruction for modifying HTML, you cannot use complex css selectors (like :contains(), or / etc...), but you can have > + ~ , etc. js MUST be in the 'script' selector, css must be in the 'style' selector. If necessary, you may use regex.",
             type: "object",
             properties: {
                 action: {
                     type: "string",
-                    description: "Action to perform: replace, insert, or delete",
-                    enum: ["replace", "insert", "delete"],
+                    description: "Action to perform: replace, insert, delete, or editAttribute",
+                    enum: ["replace", "insert", "delete", "editAttribute"],
                 },
                 target: {
                     type: "string",
-                    description: "CSS selector for the target element",
+                    description: "CSS selector for the target element, you cannot use complex css selectors (like :contains(), or / etc...), but you can have > + ~ , etc... If necessary, you may use regex.",
+                    pattern: "^(?!.*<html>).*", // Disallow <!DOCTYPE html>
                 },
                 content: {
                     type: "string",
@@ -134,11 +141,19 @@
                     maxLength: 5000, // Limit content size
                     pattern: "^(?!.*<!DOCTYPE html>).*", // Disallow <!DOCTYPE html>
                 },
+                attribute: {
+                    type: "string",
+                    description: "Attribute name for editAttribute action",
+                    nullable: true,
+                },
+                value: {
+                    type: "string",
+                    description: "Attribute value for editAttribute action",
+                    nullable: true,
+                },
             },
             required: ["action", "target"],
         };
-
-
 
         // Function to get the next API key
         function getNextApiKey() {
@@ -151,44 +166,70 @@
         function createGenerativeModel() {
             const API_KEY = getNextApiKey(); // Get the next API key
             console.log(API_KEY)
-            console.log(API_KEY)
             const genAI = new GoogleGenerativeAI(API_KEY); // Initialize GoogleGenerativeAI with the API key
 
             return genAI.getGenerativeModel({
                 model: "gemini-1.5-flash",
-                generationConfig: {
+                systemInstruction: `
+                    Generate a single edit instruction to modify the HTML content. The instruction should be clear and concise, and follow the predefined schema.
+                    - if you need to add css simply say "insert" in the style tag, and if you need to add js, say "insert" in the script tag.
+                    WHATEVER HAPPENS, DO NOT FOR SOME REASON GENERATE ALL THE MAIN PAGE CONTENT IN THE <HEADER> AS YOU MAY GET CONFUSED AS IT WILL NORMALLY BE THE FIRST THING CREATED INSTEAD ENSURE ELEMENTS THAT NEED ARE ADDED TO THE BODY TAG!`,
+                    generationConfig: {
                     responseMimeType: "application/json", // Ensure JSON response
                     responseSchema: schema, // Use the predefined schema
                 },
             });
         }
 
-        const previewDiv = document.getElementById("preview");
+        const previewIframe = document.getElementById("preview-iframe");
 
         // Function to apply a single edit instruction to the HTML
         function applyEditInstruction(currentHTML, edit) {
             let parser = new DOMParser();
             let doc = parser.parseFromString(currentHTML, "text/html");
 
-            switch (edit.action) {
-                case 'replace':
-                    const replaceElement = doc.querySelector(edit.target);
-                    if (replaceElement) replaceElement.innerHTML = edit.content;
-                    break;
-                case 'insert':
-                    if (edit.target == "") {
-                      
-                    } else {
-                      const insertElement = doc.querySelector(edit.target);
-                      if (insertElement) insertElement.innerHTML += edit.content;
-                    }
-                    break;
-                case 'delete':
-                    const deleteElement = doc.querySelector(edit.target);
-                    if (deleteElement) deleteElement.remove();
-                    break;
-                default:
-                    console.error(`Unknown action: ${edit.action}`);
+            try {
+                switch (edit.action) {
+                    case 'replace':
+                        const replaceElements = doc.querySelectorAll(edit.target);
+                        if (replaceElements.length === 0) throw new Error("No elements found for replacement");
+                        replaceElements.forEach(element => {
+                            element.outerHTML = edit.content;
+                        });
+                        break;
+                    case 'insert':
+                        const insertElements = doc.querySelectorAll(edit.target);
+                        if (insertElements.length === 0) throw new Error("No elements found for insertion");
+                        insertElements.forEach(element => {
+                            element.innerHTML += edit.content;
+                        });
+                        break;
+                    case 'delete':
+                        const deleteElements = doc.querySelectorAll(edit.target);
+                        if (deleteElements.length === 0) throw new Error("No elements found for deletion");
+                        deleteElements.forEach(element => {
+                            element.remove();
+                        });
+                        break;
+                    case 'editAttribute':
+                        const editAttrElements = doc.querySelectorAll(edit.target);
+                        if (editAttrElements.length === 0) throw new Error("No elements found for attribute editing");
+                        editAttrElements.forEach(element => {
+                            element.setAttribute(edit.attribute, edit.value);
+                        });
+                        break;
+                    default:
+                        console.error(`Unknown action: ${edit.action}`);
+                }
+            } catch (error) {
+                console.warn(error.message);
+                // Fallback to find and replace
+                try {
+                    const regex = new RegExp(edit.target, 'g');
+                    currentHTML = currentHTML.replace(regex, edit.content);
+                } catch (regexError) {
+                    console.warn("Invalid regex pattern:", edit.target);
+                }
             }
 
             return doc.documentElement.innerHTML;
@@ -196,7 +237,6 @@
 
         // Function to dynamically process instruction via the secondary model
         async function processInstruction(currentHTML, instruction) {
-            const response = await createGenerativeModel().generateContent(`HTML:${currentHTML}, Instruction:${instruction}`);
             const response = await createGenerativeModel().generateContent(`HTML:${currentHTML}, Instruction:${instruction}`);
             var editInstruction = response.response.text();
             editInstruction = JSON.parse(editInstruction);
@@ -206,14 +246,14 @@
 
         // Main function to process AI instructions sequentially
         async function continuousConversation() {
-            const response = await mainModel.generateContent("Generate a coding website");
-            const instructions = response.response.text().split(',');
-            let currentHTML = previewDiv.srcdoc;
+            const response = await mainModel.generateContent("torahanytime.com");
+            const instructions = response.response.text().split('¶');
+            let currentHTML = previewIframe.srcdoc;
 
             for (const instruction of instructions) {
                 console.log(`Processing: ${instruction.trim()}`);
                 currentHTML = await processInstruction(currentHTML, instruction.trim());
-                previewDiv.srcdoc = currentHTML; // Update the preview div
+                previewIframe.srcdoc = currentHTML; // Update the iframe srcdoc
                 console.log(currentHTML)
             }
 
