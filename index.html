@@ -116,6 +116,7 @@
             Return all instructions in a single line, separated by ¶, without extra explanations or formatting.
             The finished result should have a high level of complexity as if made by a professional web developing company like google or microsoft.
             Ensure at the end all variables and functioned that are referenced have been created, and that the page is fully functional.
+            - DO NOT SAY E.G. : ADD THESE STYLE: ........... INSTEAD SAY ADD THIS "TYPE OF STYLE" TO THIS ELEMENT
             AFTERWARDS, ALWAYS FIX UP AND ADD STYLES TO THE PAGE TO MAKE IT LOOK MORE AND MORE AND MORE PROFESSIONAL LIKE SCROLLING EFFECTS HOVER EFFECTS ANIMATIONS ETC, AND MAKE SURE TO ADD ANY JS NEEDED FOR FUNCTIONALITY.
             `,
         });
@@ -173,7 +174,8 @@
                 model: "gemini-1.5-flash",
                 systemInstruction: `
                     Generate a single edit instruction to modify the HTML content. The instruction should be clear and concise, and follow the predefined schema.
-                    - if you need to add css simply say "insert" in the style tag, and if you need to add js, say "insert" in the script tag.`,
+                    - if you need to add css simply say "insert" in the style tag, and if you need to add js, say "insert" in the script tag.
+                    - you cannot use complex css selectors (like :contains(), or / or e.g. div.content etc...), but you can have > + ~ , etc... If necessary, you may use regex.`,
                     generationConfig: {
                     responseMimeType: "application/json", // Ensure JSON response
                     responseSchema: schema, // Use the predefined schema
@@ -246,7 +248,7 @@
 
         // Main function to process AI instructions sequentially
         async function continuousConversation() {
-            const response = await mainModel.generateContent("windows xp emulator with a few apps that can open and close, hide and delete window buttons - fullscreen emulator");
+            const response = await mainModel.generateContent("windows xp emulator with apps and close, hide and delete window buttons - fullscreen emulator");
             const instructions = response.response.text().split('¶');
             let currentHTML = previewIframe.srcdoc;
 
