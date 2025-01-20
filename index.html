@@ -99,7 +99,7 @@
                 </html>
             Your first instruction should be to add a style tag in the head tag, and a script tag in the body tag.
             Emphasise that js should be in script tags, and css in style tags every time you need to add them - tell the ai to always "insert" in script/style tag the css..."
-            such as adding HTML elements, applying CSS styles in style tags (you dont need to specify the css code, just what styles to apply), or adding content. 
+            such as adding HTML elements, applying CSS styles in style tags (you dont need to specify ANY css code, just what styles to apply - like saying make the header fit screen width, be a good height, and stick to top with fixed position etc), or adding content. 
             ALWAYS MAKE SURE TO ADD THE ELEMENTS IN THE BODY TAG, AND THE STYLES IN THE HEAD TAG
             Make sure to properly and very nicely style the entire page according to what the user wants (do not let anything look at all unproffessional), and as much js as needed for the functionality the user is looking for.
             Have in mind that css and js cannot be modified, only added to, so make sure to do full css classes in style tags, and js functions at a time, you may need to emphasise to do the whole function, linking to variables and functions not yet created, as there is a limit to how much can be done in 1 step.
@@ -115,6 +115,7 @@
             Make sure instructions are efficient, logically ordered, and avoid unnecessary repetition.
             Return all instructions in a single line, separated by ¶, without extra explanations or formatting.
             The finished result should have a high level of complexity as if made by a professional web developing company like google or microsoft.
+            Ensure at the end all variables and functioned that are referenced have been created, and that the page is fully functional.
             AFTERWARDS, ALWAYS FIX UP AND ADD STYLES TO THE PAGE TO MAKE IT LOOK MORE AND MORE AND MORE PROFESSIONAL LIKE SCROLLING EFFECTS HOVER EFFECTS ANIMATIONS ETC, AND MAKE SURE TO ADD ANY JS NEEDED FOR FUNCTIONALITY.
             `,
         });
@@ -172,8 +173,7 @@
                 model: "gemini-1.5-flash",
                 systemInstruction: `
                     Generate a single edit instruction to modify the HTML content. The instruction should be clear and concise, and follow the predefined schema.
-                    - if you need to add css simply say "insert" in the style tag, and if you need to add js, say "insert" in the script tag.
-                    WHATEVER HAPPENS, DO NOT FOR SOME REASON GENERATE ALL THE MAIN PAGE CONTENT IN THE <HEADER> AS YOU MAY GET CONFUSED AS IT WILL NORMALLY BE THE FIRST THING CREATED INSTEAD ENSURE ELEMENTS THAT NEED ARE ADDED TO THE BODY TAG!`,
+                    - if you need to add css simply say "insert" in the style tag, and if you need to add js, say "insert" in the script tag.`,
                     generationConfig: {
                     responseMimeType: "application/json", // Ensure JSON response
                     responseSchema: schema, // Use the predefined schema
@@ -246,7 +246,7 @@
 
         // Main function to process AI instructions sequentially
         async function continuousConversation() {
-            const response = await mainModel.generateContent("torahanytime.com");
+            const response = await mainModel.generateContent("windows xp emulator with a few apps that can open and close, hide and delete window buttons - fullscreen emulator");
             const instructions = response.response.text().split('¶');
             let currentHTML = previewIframe.srcdoc;
 
