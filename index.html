@@ -57,7 +57,8 @@
 </head>
 
 <body>
-    <iframe id="preview-iframe" class="preview-container" srcdoc='<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Document</title><style></style></head><body><header></header><div class="main-content"></div><script></script></body></html>'></iframe>
+    <iframe id="preview-iframe" class="preview-container"
+        srcdoc='<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Document</title><style></style></head><body><header></header><div class="main-content"></div><script></script></body></html>'></iframe>
 
     <script type="module">
         import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -101,6 +102,7 @@
             Emphasise that js should be in script tags, and css in style tags every time you need to add them - tell the ai to always "insert" in script/style tag the css..."
             such as adding HTML elements, applying CSS styles in style tags (you dont need to specify ANY css code, just what styles to apply - like saying make the header fit screen width, be a good height, and stick to top with fixed position etc), or adding content. 
             ALWAYS MAKE SURE TO ADD THE ELEMENTS IN THE BODY TAG, AND THE STYLES IN THE HEAD TAG
+            DO NOT TELL IN THE INSTRUCTIONS "ANY" CODE, JUST BRIEFLY SAY WHAT YOU WANT IT TO LOOK LIKE OR DO!
             Make sure to properly and very nicely style the entire page according to what the user wants (do not let anything look at all unproffessional), and as much js as needed for the functionality the user is looking for.
             Have in mind that css and js cannot be modified, only added to, so make sure to do full css classes in style tags, and js functions at a time, you may need to emphasise to do the whole function, linking to variables and functions not yet created, as there is a limit to how much can be done in 1 step.
             Also emphasise not to repeat code or definitions, and to make sure the code is as clean and efficient as possible.
@@ -171,12 +173,16 @@
             const genAI = new GoogleGenerativeAI(API_KEY); // Initialize GoogleGenerativeAI with the API key
 
             return genAI.getGenerativeModel({
-                model: "gemini-1.5-flash",
+                model: "gemini-2.0-flash-exp",
                 systemInstruction: `
                     Generate a single edit instruction to modify the HTML content. The instruction should be clear and concise, and follow the predefined schema.
                     - if you need to add css simply say "insert" in the style tag, and if you need to add js, say "insert" in the script tag.
-                    - you cannot use complex css selectors (like :contains(), or / or e.g. div.content etc...), but you can have > + ~ , etc... If necessary, you may use regex.`,
-                    generationConfig: {
+                    - you cannot use complex css selectors (like :contains(), or / or e.g. div.content etc...), but you can have > + ~  - basicaly you can only use slectors that will work in a js getElementsByQuerySelector("") function etc... If necessary, you may use regex.
+                    - js and css cannot be edited. so ensure whenever adding styles, or a js function, link EVERYTHING needed, and NEVER EVER readd that function.
+                    - when you DO add js or css, you may only add it. hence, do not readd all previous js, as it will stay there.
+                    - you can NEVER use replace to add js or css, only insert.
+                    - LOOK AT PREVIOUS CODE, AND ENSURE THAT YOU NEVER EVER ADD A FUNCTION OR VARIABLE THAT IS ALREADY DEFINED!!!!!!!`,
+                generationConfig: {
                     responseMimeType: "application/json", // Ensure JSON response
                     responseSchema: schema, // Use the predefined schema
                 },
@@ -184,6 +190,14 @@
         }
 
         const previewIframe = document.getElementById("preview-iframe");
+
+        function newLogic(scriptContent, existingScripts) {
+            if (!existingScripts.includes(scriptContent)) {
+                return existingScripts + `\n${scriptContent}`;
+            }
+            return existingScripts;
+        }
+
 
         // Function to apply a single edit instruction to the HTML
         function applyEditInstruction(currentHTML, edit) {
@@ -200,11 +214,21 @@
                         });
                         break;
                     case 'insert':
-                        const insertElements = doc.querySelectorAll(edit.target);
-                        if (insertElements.length === 0) throw new Error("No elements found for insertion");
-                        insertElements.forEach(element => {
-                            element.innerHTML += edit.content;
-                        });
+                        if (edit.target === 'script') {
+                            const scriptTag = doc.querySelector('script');
+                            if (scriptTag) {
+                                const currentScriptContent = scriptTag.innerHTML;
+                                scriptTag.innerHTML = newLogic(edit.content, currentScriptContent);
+                            } else {
+                                throw new Error("No <script> tag found for insertion");
+                            }
+                        } else {
+                            const insertElements = doc.querySelectorAll(edit.target);
+                            if (insertElements.length === 0) throw new Error("No elements found for insertion");
+                            insertElements.forEach(element => {
+                                element.innerHTML += edit.content;
+                            });
+                        }
                         break;
                     case 'delete':
                         const deleteElements = doc.querySelectorAll(edit.target);
@@ -240,15 +264,27 @@
         // Function to dynamically process instruction via the secondary model
         async function processInstruction(currentHTML, instruction) {
             const response = await createGenerativeModel().generateContent(`HTML:${currentHTML}, Instruction:${instruction}`);
-            var editInstruction = response.response.text();
+            let editInstruction = response.response.text();
             editInstruction = JSON.parse(editInstruction);
             console.log(`Instruction: ${instruction}, Edit:`, editInstruction);
-            return applyEditInstruction(currentHTML, editInstruction);
+
+            if (editInstruction.target === 'script' && editInstruction.action === 'insert') {
+                const scriptTagMatch = currentHTML.match(/<script>([\s\S]*?)<\/script>/);
+                const currentScriptContent = scriptTagMatch ? scriptTagMatch[1] : '';
+                const updatedScriptContent = newLogic(editInstruction.content, currentScriptContent);
+                currentHTML = currentHTML.replace(/<script>([\s\S]*?)<\/script>/, `<script>${updatedScriptContent}</scr` + `ipt>`);
+            } else {
+                currentHTML = applyEditInstruction(currentHTML, editInstruction);
+            }
+
+            return currentHTML;
         }
+
 
         // Main function to process AI instructions sequentially
         async function continuousConversation() {
-            const response = await mainModel.generateContent("windows xp emulator with apps and close, hide and delete window buttons - fullscreen emulator");
+            // const response = await mainModel.generateContent("old style hacking terminal style helpful link website. It has a searchbar in center, that goes to window.open google.com/search with whatevers typed, and also has a few helpful links. in the header at the top it has the date and live time to the second.");
+            const response = await mainModel.generateContent("js platformer, fun with a few difficult levels in order of difficulty. fullscreen.");
             const instructions = response.response.text().split('¶');
             let currentHTML = previewIframe.srcdoc;
 
